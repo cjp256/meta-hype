@@ -1,0 +1,277 @@
+#!/bin/sh
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+ROOT_MOUNT=/mnt/root
+ROOT_IMAGE_PCR=9
+IP=$(which ip)
+LN=$(which ln)
+MKDIR=$(which mkdir)
+MKNOD=$(which mknod)
+MKTEMP=$(which mktemp)
+MODPROBE=$(which modprobe)
+MOUNT=$(which mount)
+SLEEP=$(which sleep)
+
+[ -z "$CONSOLE" ] && CONSOLE="/dev/console"
+
+# debug logging failure sequence
+#   give access to a shell
+fatal() {
+    echo $1 >$CONSOLE
+    echo >$CONSOLE
+    exec sh
+}
+# production logging failure sequence (no shell)
+fatal_prod() {
+    echo $1 >$CONSOLE
+    echo >$CONSOLE
+}
+
+# sanity
+[ ! -x $IP ]       && fatal "No ip command."
+[ ! -x $LN ]       && fatal "No ln command."
+[ ! -x $MKDIR ]    && fatal "No mkdir command."
+[ ! -x $MKNOD ]    && fatal "No mknod command."
+[ ! -x $MKTEMP ]   && fatal "No mktemp command."
+[ ! -x $MODPROBE ] && fatal "No modprobe command."
+[ ! -x $MOUNT ]    && fatal "No mount command."
+[ ! -x $SLEEP ]    && fatal "No sleep command."
+
+early_setup () {
+    $MKDIR /proc /sys
+    $MOUNT -t proc proc /proc
+    $MOUNT -t sysfs sysfs /sys
+
+    $MKDIR /tmp /run
+    $LN -s /run /var/run
+}
+
+tss_setup () {
+    $MODPROBE -i tpm-tis
+    # tcsd needs loopback networking
+    if ! $IP addr add 127.0.0.1/8 dev lo ; then
+        fatal "failed to give loopback a localhost address"
+    fi
+    if ! $IP link set up dev lo ; then
+        fatal "failed to bring up loopback device"
+    fi
+    # get udev rules executed. we care about tpm & removable media
+    if ! /etc/init.d/udev start ; then
+        fatal "failed to start udev"
+    fi
+    # run tcsd
+    if ! /etc/init.d/trousers start ; then
+        fatal "failed to start tcsd"
+    fi
+}
+
+choose_device() {
+    # choose which device to install to
+    while [ 1 ]; do
+        dev_list=$(find /sys/block/ -maxdepth 1 -name '[sh]d*')
+
+        echo "devices available: $dev_list"
+
+        read -p "enter device to install to: ($DEFAULT_DEVICE) " DST_DEVICE
+
+        if [ -z "$DST_DEVICE" ]; then
+            DST_DEVICE=$DEFAULT_DEVICE
+        fi
+        
+        if [ -b "/dev/$DST_DEVICE" ]; then 
+            echo "/dev/$DST_DEVICE exists..."
+            break
+        fi
+        
+        echo "invalid block device /dev/$DST_DEVICE..."
+        
+        if [ ! -f "/sys/block/$DST_DEVICE/device/model" ]; then
+            echo "does not exist: /sys/block/$DST_DEVICE/device/model"
+        fi            
+                
+        echo "invalid device specified: $DST_DEVICE"
+        
+        if [ "$DST_DEVICE" == "quit" ]; then
+            echo "bailing..."
+            break
+        fi
+    done
+}
+
+choose_device_for_sure() {
+    while [ 1 ]; do
+        choose_device
+        
+        if [ "$DST_DEVICE" == "quit" ]; then
+            echo "bailing..."
+            break
+        fi
+        
+        let x=$(cat "/sys/block/$DST_DEVICE/size")
+        let xgb=$x*512/1024/1024
+        
+        echo "you chose:"
+        echo "  device: $DST_DEVICE"
+        echo "  model: $(cat /sys/block/$DST_DEVICE/device/model)"
+        echo "  size: $xgb GiB"
+        
+        read -p "are you sure? (y/n) " yn
+        
+        if [ "$yn" == "y" ]; then
+            break;
+        fi
+        
+        echo "invalid answer..."
+    done
+}
+
+freshen_up() {
+    # sync and trigger udev
+    sync
+    sleep 1
+    udevadm trigger
+    sleep 1
+}
+
+set -x
+
+#DOM0_BOOT_PARTITION_SIZE="128M"
+DOM0_ROOT_PARTITION_SIZE="512M"
+DOM0_SECURE_PARTITION_SIZE="4G"
+DOM0_STORAGE_PARTITION_SIZE="100%FREE"
+DEFAULT_DEVICE="sda"
+DEVICE=""
+
+echo "welcome to the installer!"
+
+early_setup
+tss_setup
+
+# populate /dev
+mount -t devtmpfs devtmpfs $rootmnt/dev
+
+# find me some mtab
+ln -sf /proc/mounts /etc/mtab
+
+# remove automount rules
+rm /etc/udev/rules.d/automount.rules
+
+# figure out where to install
+choose_device_for_sure
+
+# did 
+#umount /media/* >/dev/null 2&1
+
+# really, you want to bail out now??
+if [ "$DST_DEVICE" == "quit" ]; then
+    sh -i
+fi
+
+DEVICE="/dev/$DST_DEVICE"
+BOOT_PARTITION="$DEVICE"1
+LVM_PARTITION="$DEVICE"2
+
+# nuke mbr/partition table
+echo "nuking partition table and mbr..."
+dd if=/dev/zero of=$DEVICE bs=512 count=1
+
+# push mbr
+dd if=/usr/lib/syslinux/mbr.bin of=$DEVICE
+
+# XXX: since syslinux does not support lvm, create 128M /boot
+fdisk $DEVICE <<EOF
+n
+p
+1
+
++256M
+t
+83
+
+a
+1
+
+w
+EOF
+
+# freshen up
+freshen_up
+
+# create second lvm partition
+fdisk $DEVICE <<EOF
+n
+p
+2
+
+
+t
+2
+8e
+
+w
+EOF
+
+# freshen up
+freshen_up
+
+# nuking old partition data in case there are leftovers
+#echo "nuking partition new partitions..."
+#dd if=/dev/zero of=$BOOT_PARTITION bs=512 count=100
+#dd if=/dev/zero of=$LVM_PARTITION bs=512 count=100
+#freshen_up
+
+# create lvm physical volume and volume group
+echo "creating lvm partitions..."
+pvcreate -ff -y $LVM_PARTITION
+vgcreate dom0 $LVM_PARTITION
+vgscan
+
+# create the logical volumes
+#lvcreate --name boot --size $DOM0_BOOT_PARTITION_SIZE dom0
+lvcreate --name root --size $DOM0_ROOT_PARTITION_SIZE dom0
+lvcreate --name secure --size $DOM0_SECURE_PARTITION_SIZE dom0
+lvcreate --name storage -l $DOM0_STORAGE_PARTITION_SIZE dom0
+
+# format all these wonderful volumes...
+echo "formatting partitions..."
+mkfs.ext4 $BOOT_PARTITION
+#mkfs.ext4 /dev/mapper/dom0-root
+mkfs.ext4 /dev/mapper/dom0-storage
+
+# TODO: create /secure encrypted partition
+#mkfs.ext4 /dev/mapper/dom0-secure
+
+mkdir -p /mnt/boot
+mkdir -p /mnt/storage
+mkdir -p /mnt
+
+# mount boot partition for installation
+mount $BOOT_PARTITION /mnt/boot
+
+# mount storage partition
+mount /dev/mapper/dom0-storage /mnt/storage
+
+# install extlinux
+extlinux --install /mnt/boot
+
+# copy over syslinux modules
+rsync -av /installer/boot-image/. /mnt/boot/.
+
+# self reference /boot
+cd /mnt/boot
+ln -sf . boot
+cd /
+
+# copy over rootfs
+#dd if=/installer/root-image/rootfs.img of=/dev/mapper/dom0-root bs=512
+cp /installer/root-image/rootfs.img /mnt/storage/rootfs.img
+
+# cleanup
+umount /mnt/storage
+umount /mnt/boot
+
+# TODO: install-time measurements
+sh -i
+
+# reboot
+reboot
