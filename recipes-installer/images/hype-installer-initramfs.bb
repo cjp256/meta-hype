@@ -1,5 +1,5 @@
 
-require ${TOPDIR}/meta-measured/recipes-tpm/images/core-image-tpm-initramfs.bb
+require ${TOPDIR}/../meta-measured/recipes-tpm/images/core-image-tpm-initramfs.bb
 
 export IMAGE_BASENAME = "hype-installer-initramfs"
 
