@@ -1,7 +1,7 @@
 inherit core-image
 inherit bootimg
 
-export IMAGE_BASENAME = "hype-installer-initramfs"
+export IMAGE_BASENAME = "hype-installer"
 
 IMAGE_INSTALL = " \
     hype-installer-init \
