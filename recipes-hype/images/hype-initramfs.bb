@@ -4,7 +4,7 @@ require ${TOPDIR}/../meta-measured/recipes-tpm/images/core-image-tpm-initramfs.b
 export IMAGE_BASENAME = "hype-initramfs"
 
 IMAGE_INSTALL = " \
-    hype-initramfs-init \
+    initramfs-boot-tpm \
     busybox \
     udev \
     base-passwd \
