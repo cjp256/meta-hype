@@ -144,6 +144,9 @@ DEVICE=""
 
 echo "welcome to the installer!"
 
+# remove automount rules
+rm /etc/udev/rules.d/automount.rules
+
 early_setup
 tss_setup
 
@@ -152,9 +155,6 @@ mount -t devtmpfs devtmpfs $rootmnt/dev
 
 # find me some mtab
 ln -sf /proc/mounts /etc/mtab
-
-# remove automount rules
-rm /etc/udev/rules.d/automount.rules
 
 # figure out where to install
 choose_device_for_sure
@@ -254,24 +254,21 @@ mount /dev/mapper/dom0-storage /mnt/storage
 # install extlinux
 extlinux --install /mnt/boot
 
-# copy over syslinux modules
-rsync -av /installer/boot-image/. /mnt/boot/.
-
-# self reference /boot
-cd /mnt/boot
-ln -sf . boot
-cd /
+# copy over boot modules
+rsync --exclude rootfs.img -av /installer/ /mnt/boot/.
 
 # copy over rootfs
 #dd if=/installer/root-image/rootfs.img of=/dev/mapper/dom0-root bs=512
-cp /installer/root-image/rootfs.img /mnt/storage/rootfs.img
+cp /installer/rootfs.img /mnt/storage/rootfs.img
 
 # cleanup
 umount /mnt/storage
 umount /mnt/boot
 
-# TODO: install-time measurements
-sh -i
+sync
+
+echo "installation complete! rebooting..."
+sleep 5
 
 # reboot
-reboot
+reboot -f
