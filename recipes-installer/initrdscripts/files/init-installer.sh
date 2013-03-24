@@ -228,7 +228,7 @@ vgscan
 
 # create the logical volumes
 #lvcreate --name boot --size $DOM0_BOOT_PARTITION_SIZE dom0
-lvcreate --name root --size $DOM0_ROOT_PARTITION_SIZE dom0
+#lvcreate --name root --size $DOM0_ROOT_PARTITION_SIZE dom0
 lvcreate --name secure --size $DOM0_SECURE_PARTITION_SIZE dom0
 lvcreate --name storage -l $DOM0_STORAGE_PARTITION_SIZE dom0
 
