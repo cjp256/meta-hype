@@ -1,5 +1,4 @@
 inherit core-image
-inherit bootimg
 
 export IMAGE_BASENAME = "hype-installer"
 
@@ -65,7 +64,7 @@ ROOTFS_POSTPROCESS_COMMAND += "echo "TIMEOUT 10" >> ${IMAGE_ROOTFS}/installer/sy
 ROOTFS_POSTPROCESS_COMMAND += "echo "PROMPT 1" >> ${IMAGE_ROOTFS}/installer/syslinux.cfg;"
 ROOTFS_POSTPROCESS_COMMAND += "echo "LABEL boot" >> ${IMAGE_ROOTFS}/installer/syslinux.cfg;"
 ROOTFS_POSTPROCESS_COMMAND += "echo "  KERNEL mboot.c32" >> ${IMAGE_ROOTFS}/installer/syslinux.cfg;"
-ROOTFS_POSTPROCESS_COMMAND += "echo "  APPEND /tboot.gz logging=serial,vga,memory --- /vmlinuz ramdisk_size=32768 root=/dev/ram0 rw rootimg=rootfs.img rootimgpcr=9 console=tty0 console=ttyS0,115200n8 --- /initrd --- /acm_snb.bin --- /acm_ivb.bin" >> ${IMAGE_ROOTFS}/installer/syslinux.cfg;"
+ROOTFS_POSTPROCESS_COMMAND += "echo "  APPEND /tboot.gz logging=serial,vga,memory --- /vmlinuz ramdisk_size=32768 root=/dev/ram0 rw rootimg=rootfs.img rootimgpcr=9 console=ttyS0,115200n8 console=tty0 --- /initrd --- /acm_snb.bin --- /acm_ivb.bin" >> ${IMAGE_ROOTFS}/installer/syslinux.cfg;"
 	
 syslinux_iso_populate_append() {
 	install -m 0444 ${STAGING_LIBDIR}/syslinux/mboot.c32 ${ISODIR}${ISOLINUXDIR}
@@ -84,5 +83,5 @@ build_syslinux_cfg () {
 	echo "PROMPT 1" >> ${SYSLINUXCFG}
 	echo "LABEL boot" >> ${SYSLINUXCFG}
 	echo "  KERNEL mboot.c32" >> ${SYSLINUXCFG}
-	echo "  APPEND /tboot.gz logging=serial,vga,memory --- /vmlinuz ramdisk_size=32768 root=/dev/ram0 rw rootimg=rootfs.img rootimgpcr=9 console=tty0 console=ttyS0,115200n8 --- /initrd --- /acm_snb.bin --- /acm_ivb.bin" >> ${SYSLINUXCFG}
+	echo "  APPEND /tboot.gz logging=serial,vga,memory --- /vmlinuz ramdisk_size=32768 root=/dev/ram0 rw rootimg=rootfs.img rootimgpcr=9 console=ttyS0,115200n8 console=tty0 --- /initrd --- /acm_snb.bin --- /acm_ivb.bin" >> ${SYSLINUXCFG}
 }
