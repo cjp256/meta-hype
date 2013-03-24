@@ -184,7 +184,7 @@ n
 p
 1
 
-+256M
++512M
 t
 83
 
@@ -254,12 +254,9 @@ mount /dev/mapper/dom0-storage /mnt/storage
 # install extlinux
 extlinux --install /mnt/boot
 
-# copy over boot modules
-rsync --exclude rootfs.img -av /installer/ /mnt/boot/.
-
-# copy over rootfs
-#dd if=/installer/root-image/rootfs.img of=/dev/mapper/dom0-root bs=512
-cp /installer/rootfs.img /mnt/storage/rootfs.img
+# copy over boot modules, including rootfs 
+# (core-image-tpm-initramfs doesn't activate lvm volumes)
+rsync -av /installer/ /mnt/boot/.
 
 # cleanup
 umount /mnt/storage
