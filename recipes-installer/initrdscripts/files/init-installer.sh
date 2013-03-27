@@ -47,7 +47,7 @@ early_setup () {
 }
 
 tss_setup () {
-    $MODPROBE -i tpm-tis
+    $MODPROBE tpm-tis
     # tcsd needs loopback networking
     if ! $IP addr add 127.0.0.1/8 dev lo ; then
         fatal "failed to give loopback a localhost address"
@@ -56,6 +56,9 @@ tss_setup () {
         fatal "failed to bring up loopback device"
     fi
     # get udev rules executed. we care about tpm & removable media
+    # touch functions since current dev requires it and DNE
+    touch /etc/init.d/functions
+    chmod +x /etc/init.d/functions
     if ! /etc/init.d/udev start ; then
         fatal "failed to start udev"
     fi
@@ -135,8 +138,7 @@ freshen_up() {
 
 set -x
 
-#DOM0_BOOT_PARTITION_SIZE="128M"
-DOM0_ROOT_PARTITION_SIZE="512M"
+DOM0_BOOT_PARTITION_SIZE="128M"
 DOM0_SECURE_PARTITION_SIZE="4G"
 DOM0_STORAGE_PARTITION_SIZE="100%FREE"
 DEFAULT_DEVICE="sda"
@@ -168,8 +170,8 @@ if [ "$DST_DEVICE" == "quit" ]; then
 fi
 
 DEVICE="/dev/$DST_DEVICE"
-BOOT_PARTITION="$DEVICE"1
-LVM_PARTITION="$DEVICE"2
+
+LVM_PARTITION="$DEVICE"1
 
 # nuke mbr/partition table
 echo "nuking partition table and mbr..."
@@ -178,34 +180,14 @@ dd if=/dev/zero of=$DEVICE bs=512 count=1
 # push mbr
 dd if=/usr/lib/syslinux/mbr.bin of=$DEVICE
 
-# XXX: since syslinux does not support lvm, create 128M /boot
+# create lvm partition
 fdisk $DEVICE <<EOF
 n
 p
 1
 
-+512M
-t
-83
-
-a
-1
-
-w
-EOF
-
-# freshen up
-freshen_up
-
-# create second lvm partition
-fdisk $DEVICE <<EOF
-n
-p
-2
-
 
 t
-2
 8e
 
 w
@@ -227,15 +209,13 @@ vgcreate dom0 $LVM_PARTITION
 vgscan
 
 # create the logical volumes
-#lvcreate --name boot --size $DOM0_BOOT_PARTITION_SIZE dom0
-#lvcreate --name root --size $DOM0_ROOT_PARTITION_SIZE dom0
+lvcreate --name boot --size $DOM0_BOOT_PARTITION_SIZE dom0
 lvcreate --name secure --size $DOM0_SECURE_PARTITION_SIZE dom0
 lvcreate --name storage -l $DOM0_STORAGE_PARTITION_SIZE dom0
 
 # format all these wonderful volumes...
 echo "formatting partitions..."
-mkfs.ext4 $BOOT_PARTITION
-#mkfs.ext4 /dev/mapper/dom0-root
+mkfs.ext4 /dev/mapper/dom0-boot
 mkfs.ext4 /dev/mapper/dom0-storage
 
 # TODO: create /secure encrypted partition
@@ -246,17 +226,19 @@ mkdir -p /mnt/storage
 mkdir -p /mnt
 
 # mount boot partition for installation
-mount $BOOT_PARTITION /mnt/boot
+mount /dev/mapper/dom0-boot /mnt/boot
 
 # mount storage partition
 mount /dev/mapper/dom0-storage /mnt/storage
 
 # install extlinux
-extlinux --install /mnt/boot
+#extlinux --install /mnt/boot
 
 # copy over boot modules, including rootfs 
 # (core-image-tpm-initramfs doesn't activate lvm volumes)
 rsync -av /installer/ /mnt/boot/.
+
+sh -i
 
 # cleanup
 umount /mnt/storage
