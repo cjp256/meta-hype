@@ -56,9 +56,6 @@ tss_setup () {
         fatal "failed to bring up loopback device"
     fi
     # get udev rules executed. we care about tpm & removable media
-    # touch functions since current dev requires it and DNE
-    touch /etc/init.d/functions
-    chmod +x /etc/init.d/functions
     if ! /etc/init.d/udev start ; then
         fatal "failed to start udev"
     fi
@@ -172,18 +169,20 @@ boot_root() {
     /etc/init.d/trousers stop 2>/dev/null
     /etc/init.d/udev stop 2>/dev/null
 
-    # use devtmpfs if available
-    if grep -q devtmpfs /proc/filesystems; then
-        $MOUNT -t devtmpfs devtmpfs $rootmnt/dev
-    fi
-
     cd $rootmnt
     exec switch_root -c $CONSOLE $rootmnt /sbin/init
 }
 
+# devtmpfs required for udev/lvm
+$MOUNT -t devtmpfs devtmpfs $rootmnt/dev
+
 early_setup
 tss_setup
 read_args
+
+# initialize lvm
+lvscan
+lvchange -a y dom0
 
 find_rootimg $ROOT_IMAGE
 measure_file $ROOT_IMAGE_PATH $ROOT_IMAGE_PCR

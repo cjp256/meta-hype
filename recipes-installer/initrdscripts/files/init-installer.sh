@@ -185,7 +185,7 @@ fdisk $DEVICE <<EOF
 n
 p
 1
-
+2048
 
 t
 8e
@@ -195,12 +195,6 @@ EOF
 
 # freshen up
 freshen_up
-
-# nuking old partition data in case there are leftovers
-#echo "nuking partition new partitions..."
-#dd if=/dev/zero of=$BOOT_PARTITION bs=512 count=100
-#dd if=/dev/zero of=$LVM_PARTITION bs=512 count=100
-#freshen_up
 
 # create lvm physical volume and volume group
 echo "creating lvm partitions..."
@@ -221,24 +215,32 @@ mkfs.ext4 /dev/mapper/dom0-storage
 # TODO: create /secure encrypted partition
 #mkfs.ext4 /dev/mapper/dom0-secure
 
-mkdir -p /mnt/boot
-mkdir -p /mnt/storage
-mkdir -p /mnt
-
 # mount boot partition for installation
+mkdir -p /mnt/boot
 mount /dev/mapper/dom0-boot /mnt/boot
 
 # mount storage partition
+mkdir -p /mnt/storage
 mount /dev/mapper/dom0-storage /mnt/storage
 
-# install extlinux
-#extlinux --install /mnt/boot
+# move rootfs into /storage
+mv /installer/rootfs.img /mnt/storage/rootfs.img
 
-# copy over boot modules, including rootfs 
-# (core-image-tpm-initramfs doesn't activate lvm volumes)
-rsync -av /installer/ /mnt/boot/.
+# move over boot modules
+mv /installer/* /mnt/boot/
 
-sh -i
+# grub-install gets awfully confused - build the device.map
+mkdir -p /boot/grub
+mkdir -p /mnt/boot/grub
+echo "(hd0) $DEVICE" > /boot/grub/device.map
+echo "(hostdisk//dev/mapper/dom0-boot) /dev/mapper/dom0-boot" >> /boot/grub/device.map
+cp /boot/grub/device.map /mnt/boot/grub/device.map
+
+# install grub to disk
+grub-install --modules="lvm part_msdos" --boot-directory=/mnt/boot /dev/sda
+
+# copy grub config into place
+cp /grub.cfg /mnt/boot/grub/grub.cfg
 
 # cleanup
 umount /mnt/storage
@@ -251,3 +253,4 @@ sleep 5
 
 # reboot
 reboot -f
+
