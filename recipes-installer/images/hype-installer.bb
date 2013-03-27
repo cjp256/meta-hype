@@ -20,6 +20,7 @@ IMAGE_INSTALL = " \
     rsync \
     lvm2 \
     cryptsetup \
+    lsbinitscripts \
     "
 
 # Do not pollute the initrd image with rootfs features

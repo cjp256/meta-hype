@@ -7,4 +7,5 @@ IMAGE_INSTALL += "\
     rsync \
     lvm2 \
     cryptsetup \
+    lsbinitscripts \
 "
