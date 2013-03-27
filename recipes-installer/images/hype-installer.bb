@@ -9,6 +9,7 @@ IMAGE_INSTALL = " \
     base-passwd \
     packagegroup-tpm \
     coreutils \
+    grub \
     syslinux \
     syslinux-mbr \
     syslinux-extlinux \
@@ -30,7 +31,7 @@ IMAGE_FSTYPES = "${INITRAMFS_FSTYPES}"
 
 IMAGE_ROOTFS_SIZE = "8192"
 
-TARGET_INITRD_IMAGE = "core-image-tpm-initramfs"
+TARGET_INITRD_IMAGE = "hype-initramfs"
 TARGET_INITRD = "${DEPLOY_DIR_IMAGE}/${TARGET_INITRD_IMAGE}-${MACHINE}.cpio.gz"
 
 TARGET_ROOTFS_IMAGE = "hype-rootfs"
