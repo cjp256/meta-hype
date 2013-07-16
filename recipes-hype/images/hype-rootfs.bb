@@ -8,4 +8,5 @@ IMAGE_INSTALL += "\
     lvm2 \
     cryptsetup \
     lsbinitscripts \
+    xen-base \
 "

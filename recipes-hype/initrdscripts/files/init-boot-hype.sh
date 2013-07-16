@@ -184,6 +184,9 @@ read_args
 lvscan
 lvchange -a y dom0
 
+# make sure udev is up
+/etc/init.d/udev restart
+
 find_rootimg $ROOT_IMAGE
 measure_file $ROOT_IMAGE_PATH $ROOT_IMAGE_PCR
 mount_rootimg $ROOT_IMAGE_PATH $ROOT_MOUNT
