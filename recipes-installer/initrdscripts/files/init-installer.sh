@@ -147,7 +147,7 @@ DEVICE=""
 echo "welcome to the installer!"
 
 # remove automount rules
-rm /etc/udev/rules.d/automount.rules
+rm -f /etc/udev/rules.d/automount.rules
 
 early_setup
 tss_setup
@@ -160,9 +160,6 @@ ln -sf /proc/mounts /etc/mtab
 
 # figure out where to install
 choose_device_for_sure
-
-# did 
-#umount /media/* >/dev/null 2&1
 
 # really, you want to bail out now??
 if [ "$DST_DEVICE" == "quit" ]; then
