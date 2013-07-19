@@ -192,6 +192,9 @@ find_rootimg $ROOT_IMAGE
 measure_file $ROOT_IMAGE_PATH $ROOT_IMAGE_PCR
 mount_rootimg $ROOT_IMAGE_PATH $ROOT_MOUNT
 
+# fixup inittab to swap ttyS0 with hvc0 if using xen
+if grep -q hvc0 /proc/cmdline ; then sed -i 's/ttyS0/hvc0/g' $ROOT_MOUNT/etc/inittab; fi
+
 # a little bit of hackery - mount upcoming partitions...
 # otherwise we would lose access to storage as "busy"     
 $MOUNT -t ext4 /dev/mapper/dom0-boot $ROOT_MOUNT/boot
