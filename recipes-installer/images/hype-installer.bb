@@ -71,7 +71,7 @@ ROOTFS_POSTPROCESS_COMMAND += "install -m 0644 ${ACM} ${IMAGE_ROOTFS}/installer/
 #ROOTFS_POSTPROCESS_COMMAND += "echo "PROMPT 1" >> ${IMAGE_ROOTFS}/installer/syslinux.cfg;"
 #ROOTFS_POSTPROCESS_COMMAND += "echo "LABEL boot" >> ${IMAGE_ROOTFS}/installer/syslinux.cfg;"
 #ROOTFS_POSTPROCESS_COMMAND += "echo "  KERNEL mboot.c32" >> ${IMAGE_ROOTFS}/installer/syslinux.cfg;"
-#ROOTFS_POSTPROCESS_COMMAND += "echo "  APPEND /tboot.gz logging=serial,vga,memory --- /xen.gz loglvl=all guest_loglvl=all console=com1,vga com1=115200,8n1 --- /vmlinuz ramdisk_size=32768 root=/dev/ram0 rw rootimg=rootfs.img rootimgpcr=9 console=ttyS0,115200n8 console=tty0 --- /initrd --- /acm_snb.bin --- /acm_ivb.bin" >> ${IMAGE_ROOTFS}/installer/syslinux.cfg;"
+#ROOTFS_POSTPROCESS_COMMAND += "echo "  APPEND /tboot.gz logging=serial,vga,memory --- /xen.gz loglvl=all guest_loglvl=all console=com1,vga com1=115200,8n1 --- /vmlinuz ramdisk_size=32768 root=/dev/ram0 rw rootimg=rootfs.img rootimgpcr=9 console=hvc0 earlyprintk=xen console=tty0 panic=10 --- /initrd --- /acm_snb.bin --- /acm_ivb.bin" >> ${IMAGE_ROOTFS}/installer/syslinux.cfg;"
 
 # Pre-requisite modules needed for isolinux.
 syslinux_iso_populate_append() {
@@ -93,5 +93,5 @@ build_syslinux_cfg () {
 	echo "PROMPT 1" >> ${SYSLINUXCFG}
 	echo "LABEL boot" >> ${SYSLINUXCFG}
 	echo "  KERNEL mboot.c32" >> ${SYSLINUXCFG}
-	echo "  APPEND /tboot.gz logging=serial,vga,memory --- /xen.gz loglvl=all guest_loglvl=all console=com1,vga com1=115200,8n1 --- /vmlinuz ramdisk_size=32768 root=/dev/ram0 rw rootimg=rootfs.img rootimgpcr=9 console=ttyS0,115200n8 console=tty0 panic=10 --- /initrd --- /acm_snb.bin --- /acm_ivb.bin" >> ${SYSLINUXCFG}
+	echo "  APPEND /tboot.gz logging=serial,vga,memory --- /xen.gz loglvl=all guest_loglvl=all console=com1,vga com1=115200,8n1 --- /vmlinuz ramdisk_size=32768 root=/dev/ram0 rw rootimg=rootfs.img rootimgpcr=9 console=hvc0 earlyprintk=xen console=tty0 panic=10 --- /initrd --- /acm_snb.bin --- /acm_ivb.bin" >> ${SYSLINUXCFG}
 }
