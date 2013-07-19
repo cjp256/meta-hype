@@ -15,7 +15,7 @@ S = "${WORKDIR}/xen-${PV}"
 
 COMPATIBLE_HOST = '(x86_64.*|i.86.*).*-linux'
 
-inherit autotools gettext setuptools
+inherit autotools gettext setuptools update-rc.d
 
 DEPENDS = "util-linux util-linux-native file-native zlib ncurses openssl bison-native flex-native gettext dev86-native iasl-native pciutils virtual/libgl virtual/libsdl bridge-utils iproute2 procps yajl pixman python"
 
@@ -42,6 +42,9 @@ RDEPENDS_xen-base = "\
 	${PN}-bios-sparc \
  	${PN}-hvmloader \
 	${PN}-palcode-clipper \
+	${PN}-xen-watchdog \
+	${PN}-xencommons \
+	${PN}-xendomains \
 	"
 
 PACKAGES = "\
@@ -72,6 +75,10 @@ PACKAGES = "\
 	${PN}-bios-sparc \
  	${PN}-hvmloader \
 	${PN}-palcode-clipper \
+	${PN}-xend \
+	${PN}-xen-watchdog \
+	${PN}-xencommons \
+	${PN}-xendomains \
 	"
 
 FILES_${PN}-base += "/boot"
@@ -416,11 +423,6 @@ FILES_${PN}-most = "\
 	/etc/udev/rules.d/xen-backend.rules \
 	/etc/udev/rules.d/xend.rules \
 	/etc/bash_completion.d/xl.sh \
-	/etc/init.d \
-	/etc/init.d/xencommons \
-	/etc/init.d/xend \
-	/etc/init.d/xendomains \
-	/etc/init.d/xen-watchdog \
 	/etc/default \
 	/etc/default/xencommons \
 	/etc/default/xendomains \
@@ -472,6 +474,26 @@ FILES_${PN}-most = "\
 	/etc/xen/xend-config.sxp \
 	/etc/xen/xmexample.hvm \
 	"
+
+FILES_${PN}-xencommons += "/etc/init.d/xencommons"
+FILES_${PN}-xend += "/etc/init.d/xend"
+FILES_${PN}-xendomains += "/etc/init.d/xendomains"
+FILES_${PN}-xen-watchdog += "/etc/init.d/xen-watchdog"
+
+# Configure init.d scripts... 80 sounds like a good starting number.
+INITSCRIPT_PACKAGES = "${PN}-xend ${PN}-xencommons ${PN}-xen-watchdog ${PN}-xendomains"
+
+INITSCRIPT_NAME_${PN}-xencommons = "xencommons"
+INITSCRIPT_PARAMS_${PN}-xencommons = "defaults 80"
+
+INITSCRIPT_NAME_${PN}-xen-watchdog = "xen-watchdog"
+INITSCRIPT_PARAMS_${PN}-xen-watchdog = "defaults 81"
+
+INITSCRIPT_NAME_${PN}-xend = "xend"
+INITSCRIPT_PARAMS_${PN}-xend = "defaults 82"
+
+INITSCRIPT_NAME_${PN}-xendomains = "xendomains"
+INITSCRIPT_PARAMS_${PN}-xendomains = "defaults 83"
 
 do_configure_prepend() {
 	export BUILD_SYS=${BUILD_SYS}
