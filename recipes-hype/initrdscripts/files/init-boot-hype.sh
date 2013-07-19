@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -x
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 ROOT_MOUNT=/mnt/root
@@ -173,8 +173,8 @@ boot_root() {
     exec switch_root -c $CONSOLE $rootmnt /sbin/init
 }
 
-# devtmpfs required for udev/lvm
-$MOUNT -t devtmpfs devtmpfs $rootmnt/dev
+# disable automount rules
+rm -f /etc/udev/rules.d/automount.rules
 
 early_setup
 tss_setup
@@ -184,13 +184,25 @@ read_args
 lvscan
 lvchange -a y dom0
 
-# make sure udev is up
-/etc/init.d/udev restart
+# mount up dom0 storage
+mkdir -p /media/storage
+$MOUNT -t ext4 /dev/mapper/dom0-storage /media/storage
 
 find_rootimg $ROOT_IMAGE
 measure_file $ROOT_IMAGE_PATH $ROOT_IMAGE_PCR
 mount_rootimg $ROOT_IMAGE_PATH $ROOT_MOUNT
+
+# a little bit of hackery - mount upcoming partitions...
+# otherwise we would lose access to storage as "busy"     
+$MOUNT -t ext4 /dev/mapper/dom0-boot $ROOT_MOUNT/boot
+mkdir -p $ROOT_MOUNT/storage
+$MOUNT -o bind /media/storage $ROOT_MOUNT/storage
+
+# switch_root doesn't move /dev over properly, so we'll do it...
+$MOUNT -t devtmpfs none $ROOT_MOUNT/dev
+
 boot_root $ROOT_MOUNT
 
 # fall through == failure
 fatal "Failed to switch to root image: $ROTO_IMAGE ... unable to continue."
+
