@@ -1,6 +1,6 @@
 # measured, read-only rootfs
 
-require ${TOPDIR}/../meta-measured/recipes-tpm/images/core-image-tpm.bb
+include ${TOPDIR}/../meta-measured/recipes-tpm/images/core-image-tpm.inc
 
 IMAGE_INSTALL += "\
     tboot-utils \
@@ -10,3 +10,4 @@ IMAGE_INSTALL += "\
     lsbinitscripts \
     xen-base \
 "
+
