@@ -21,6 +21,7 @@ fatal() {
     echo >$CONSOLE
     exec sh
 }
+
 # production logging failure sequence (no shell)
 fatal_prod() {
     echo $1 >$CONSOLE
@@ -128,12 +129,85 @@ choose_device_for_sure() {
     done
 }
 
+upgrade_rootfs() {
+    while [ 1 ]; do
+
+        read -p "attempt to upgrade instead of fresh install? (y/n) " yn
+
+        if [ "$yn" == "y" ]; then
+	    return 0
+        fi
+
+	if [ "$yn" == "n" ]; then
+	    return 1
+        fi
+
+        echo "invalid answer..."
+    done
+}
+
 freshen_up() {
     # sync and trigger udev
     sync
     sleep 1
     udevadm trigger
     sleep 1
+}
+
+upgrade_check() {
+	echo "scanning logical volumes..."
+	vgscan
+	lvscan
+	if ! lvchange -a y dom0; then
+		echo "invalid upgrade target - dom0 volumes not found!"
+		return 1
+	fi
+
+	return 0
+}
+
+format_disk() {
+	# nuke mbr/partition table
+	echo "nuking partition table and mbr..."
+	dd if=/dev/zero of=$DEVICE bs=512 count=1
+
+	# push mbr
+	dd if=/usr/lib/syslinux/mbr.bin of=$DEVICE
+
+	# create lvm partition
+	fdisk $DEVICE <<EOF
+	n
+	p
+	1
+	2048
+
+	t
+	8e
+
+	w
+EOF
+
+	# freshen up
+	freshen_up
+
+	# create lvm physical volume and volume group
+	echo "creating lvm partitions..."
+	pvcreate -ff -y $LVM_PARTITION
+	vgcreate dom0 $LVM_PARTITION
+	vgscan
+
+	# create the logical volumes
+	lvcreate --name boot --size $DOM0_BOOT_PARTITION_SIZE dom0
+	lvcreate --name secure --size $DOM0_SECURE_PARTITION_SIZE dom0
+	lvcreate --name storage -l $DOM0_STORAGE_PARTITION_SIZE dom0
+
+	# format all these wonderful volumes...
+	echo "formatting partitions..."
+	mkfs.ext4 /dev/mapper/dom0-boot
+	mkfs.ext4 /dev/mapper/dom0-storage
+
+	# TODO: create /secure encrypted partition
+	#mkfs.ext4 /dev/mapper/dom0-secure
 }
 
 set -x
@@ -170,55 +244,27 @@ DEVICE="/dev/$DST_DEVICE"
 
 LVM_PARTITION="$DEVICE"1
 
-# nuke mbr/partition table
-echo "nuking partition table and mbr..."
-dd if=/dev/zero of=$DEVICE bs=512 count=1
+while [ 1 ]; do
+	# TODO: check if this a candidate for upgrade first
+	if ! upgrade_rootfs; then
+		# not upgrading, format disk and proceed
+		format_disk
+		break
+	fi
 
-# push mbr
-dd if=/usr/lib/syslinux/mbr.bin of=$DEVICE
-
-# create lvm partition
-fdisk $DEVICE <<EOF
-n
-p
-1
-2048
-
-t
-8e
-
-w
-EOF
-
-# freshen up
-freshen_up
-
-# create lvm physical volume and volume group
-echo "creating lvm partitions..."
-pvcreate -ff -y $LVM_PARTITION
-vgcreate dom0 $LVM_PARTITION
-vgscan
-
-# create the logical volumes
-lvcreate --name boot --size $DOM0_BOOT_PARTITION_SIZE dom0
-lvcreate --name secure --size $DOM0_SECURE_PARTITION_SIZE dom0
-lvcreate --name storage -l $DOM0_STORAGE_PARTITION_SIZE dom0
-
-# format all these wonderful volumes...
-echo "formatting partitions..."
-mkfs.ext4 /dev/mapper/dom0-boot
-mkfs.ext4 /dev/mapper/dom0-storage
-
-# TODO: create /secure encrypted partition
-#mkfs.ext4 /dev/mapper/dom0-secure
+	if upgrade_check; then
+		# upgrade check passed, proceed
+		break
+	fi
+done
 
 # mount boot partition for installation
 mkdir -p /mnt/boot
-mount /dev/mapper/dom0-boot /mnt/boot
+mount -t ext4 /dev/mapper/dom0-boot /mnt/boot
 
 # mount storage partition
 mkdir -p /mnt/storage
-mount /dev/mapper/dom0-storage /mnt/storage
+mount -t ext4 /dev/mapper/dom0-storage /mnt/storage
 
 # move rootfs into /storage
 mv /installer/rootfs.img /mnt/storage/rootfs.img
