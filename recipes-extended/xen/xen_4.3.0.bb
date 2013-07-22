@@ -20,7 +20,7 @@ inherit autotools gettext setuptools update-rc.d
 DEPENDS = "util-linux util-linux-native file-native zlib ncurses openssl bison-native flex-native gettext dev86-native iasl-native pciutils virtual/libgl virtual/libsdl bridge-utils iproute2 procps yajl pixman python"
 
 RDEPENDS_xen-base = "\
-	libgcc pciutils bridge-utils iproute2 util-linux udev procps bash coreutils \
+	libgcc pciutils bridge-utils iproute2 util-linux udev procps bash coreutils python python-core python-shell python-pprint perl \
 	${PN}-doc \
 	${PN}-libblktapctl \
 	${PN}-libxenguest \
@@ -37,7 +37,6 @@ RDEPENDS_xen-base = "\
 	${PN}-keymaps-base \
 	${PN}-keymaps \
 	${PN}-python \
-	${PN}-most \
 	${PN}-bios-ppc \
 	${PN}-bios-sparc \
  	${PN}-hvmloader \
@@ -69,8 +68,6 @@ PACKAGES = "\
 	${PN}-keymaps-base \
 	${PN}-keymaps \
 	${PN}-python \
-	${PN}-most \
-	${PN}-ignore \
 	${PN}-bios-ppc \
 	${PN}-bios-sparc \
  	${PN}-hvmloader \
@@ -79,9 +76,8 @@ PACKAGES = "\
 	${PN}-xen-watchdog \
 	${PN}-xencommons \
 	${PN}-xendomains \
+	${PN}-volatiles \
 	"
-
-FILES_${PN}-base += "/boot"
 
 FILES_${PN}-dbg += "\
 	/usr/lib/.debug \
@@ -193,38 +189,30 @@ FILES_${PN}-keymaps-base = "\
 	/usr/share/xen/qemu/keymaps/common \
 	/usr/share/xen/qemu/keymaps/modifiers \
 	/usr/share/xen/qemu/keymaps/en-us \
+	/usr/share/qemu-xen/qemu/keymaps/common \
+	/usr/share/qemu-xen/qemu/keymaps/modifiers \
+	/usr/share/qemu-xen/qemu/keymaps/en-us \
 	"
 
 FILES_${PN}-keymaps = "\
 	/usr/share/xen/qemu/keymaps \
+	/usr/share/qemu-xen/qemu/keymaps \
 	"
 
-# Ignore these files - they cause errors like:
-#|  * extract_archive: Cannot create symlink from ./var/log to 'volatile/log': File exists.
-FILES_${PN}-ignore = "\
-	/var/log/xen \
-	/var/run/xenstored \
-	/var/run/xend \
-	/var/run/xend/boot \
-	/var/run/xen \
-	"
-
-FILES_${PN}-most = "\
-	/var/volatile/log \
-	/var/volatile/lock \
-	/var/volatile/log/xen \
+FILES_${PN}-volatiles = "\
+	/var/log \
+	/var/run \
 	/var/lock \
-	/var/volatile/run \
-	/var/volatile/lock/subsys \
-	/var/volatile/run/xenstored \
-	/var/volatile/run/xend \
-	/var/volatile/run/xen \
-	/var/volatile/run/xend/boot \
+	/var/volatile \
+	"
+
+FILES_${PN}-base = "\
+	/boot \
+	/var/xen \
+	/var/xen/dump \
 	/var/lib/xenstored \
 	/var/lib/xen \
 	/var/lib/xen/xenpaging \
-	/var/xen \
-	/var/xen/dump \
 	/usr/lib/xen/bin/qemu-img \
 	/usr/lib/xen/bin/qemu-nbd \
 	/usr/lib/xen/bin/qemu-ga \
@@ -293,42 +281,6 @@ FILES_${PN}-most = "\
 	/usr/libexec/qemu-bridge-helper \
 	/usr/etc/qemu/target-x86_64.conf \
 	/usr/share/xen/create.dtd \
-	/usr/share/xen/qemu/keymaps \
-	/usr/share/xen/qemu/keymaps/common \
-	/usr/share/xen/qemu/keymaps/th \
-	/usr/share/xen/qemu/keymaps/is \
-	/usr/share/xen/qemu/keymaps/en-gb \
-	/usr/share/xen/qemu/keymaps/ar \
-	/usr/share/xen/qemu/keymaps/fr-be \
-	/usr/share/xen/qemu/keymaps/ru \
-	/usr/share/xen/qemu/keymaps/hu \
-	/usr/share/xen/qemu/keymaps/de-ch \
-	/usr/share/xen/qemu/keymaps/no \
-	/usr/share/xen/qemu/keymaps/fr \
-	/usr/share/xen/qemu/keymaps/pl \
-	/usr/share/xen/qemu/keymaps/fr-ca \
-	/usr/share/xen/qemu/keymaps/de \
-	/usr/share/xen/qemu/keymaps/fr-ch \
-	/usr/share/xen/qemu/keymaps/lv \
-	/usr/share/xen/qemu/keymaps/ja \
-	/usr/share/xen/qemu/keymaps/da \
-	/usr/share/xen/qemu/keymaps/lt \
-	/usr/share/xen/qemu/keymaps/hr \
-	/usr/share/xen/qemu/keymaps/es \
-	/usr/share/xen/qemu/keymaps/modifiers \
-	/usr/share/xen/qemu/keymaps/sl \
-	/usr/share/xen/qemu/keymaps/it \
-	/usr/share/xen/qemu/keymaps/nl \
-	/usr/share/xen/qemu/keymaps/fo \
-	/usr/share/xen/qemu/keymaps/mk \
-	/usr/share/xen/qemu/keymaps/pt-br \
-	/usr/share/xen/qemu/keymaps/tr \
-	/usr/share/xen/qemu/keymaps/sv \
-	/usr/share/xen/qemu/keymaps/fi \
-	/usr/share/xen/qemu/keymaps/en-us \
-	/usr/share/xen/qemu/keymaps/et \
-	/usr/share/xen/qemu/keymaps/nl-be \
-	/usr/share/xen/qemu/keymaps/pt \
 	/usr/share/xen/qemu/bamboo.dtb \
 	/usr/share/xen/qemu/pxe-pcnet.bin \
 	/usr/share/xen/qemu/pxe-ne2k_pci.bin \
@@ -339,43 +291,6 @@ FILES_${PN}-most = "\
 	/usr/share/xen/qemu/pxe-e1000.bin \
 	/usr/share/xen/qemu/ppc_rom.bin \
 	/usr/share/xen/qemu/vgabios.bin \
-	/usr/share/qemu-xen/qemu/keymaps \
-	/usr/share/qemu-xen/qemu/keymaps/common \
-	/usr/share/qemu-xen/qemu/keymaps/th \
-	/usr/share/qemu-xen/qemu/keymaps/is \
-	/usr/share/qemu-xen/qemu/keymaps/en-gb \
-	/usr/share/qemu-xen/qemu/keymaps/ar \
-	/usr/share/qemu-xen/qemu/keymaps/fr-be \
-	/usr/share/qemu-xen/qemu/keymaps/ru \
-	/usr/share/qemu-xen/qemu/keymaps/hu \
-	/usr/share/qemu-xen/qemu/keymaps/de-ch \
-	/usr/share/qemu-xen/qemu/keymaps/no \
-	/usr/share/qemu-xen/qemu/keymaps/fr \
-	/usr/share/qemu-xen/qemu/keymaps/pl \
-	/usr/share/qemu-xen/qemu/keymaps/fr-ca \
-	/usr/share/qemu-xen/qemu/keymaps/de \
-	/usr/share/qemu-xen/qemu/keymaps/fr-ch \
-	/usr/share/qemu-xen/qemu/keymaps/bepo \
-	/usr/share/qemu-xen/qemu/keymaps/lv \
-	/usr/share/qemu-xen/qemu/keymaps/ja \
-	/usr/share/qemu-xen/qemu/keymaps/da \
-	/usr/share/qemu-xen/qemu/keymaps/lt \
-	/usr/share/qemu-xen/qemu/keymaps/hr \
-	/usr/share/qemu-xen/qemu/keymaps/es \
-	/usr/share/qemu-xen/qemu/keymaps/modifiers \
-	/usr/share/qemu-xen/qemu/keymaps/sl \
-	/usr/share/qemu-xen/qemu/keymaps/it \
-	/usr/share/qemu-xen/qemu/keymaps/nl \
-	/usr/share/qemu-xen/qemu/keymaps/fo \
-	/usr/share/qemu-xen/qemu/keymaps/mk \
-	/usr/share/qemu-xen/qemu/keymaps/pt-br \
-	/usr/share/qemu-xen/qemu/keymaps/tr \
-	/usr/share/qemu-xen/qemu/keymaps/sv \
-	/usr/share/qemu-xen/qemu/keymaps/fi \
-	/usr/share/qemu-xen/qemu/keymaps/en-us \
-	/usr/share/qemu-xen/qemu/keymaps/et \
-	/usr/share/qemu-xen/qemu/keymaps/nl-be \
-	/usr/share/qemu-xen/qemu/keymaps/pt \
 	/usr/share/qemu-xen/qemu/bamboo.dtb \
 	/usr/share/qemu-xen/qemu/pxe-pcnet.rom \
 	/usr/share/qemu-xen/qemu/vgabios-vmware.bin \
@@ -508,6 +423,9 @@ do_configure_prepend() {
 
 	# make xen requires CROSS_COMPILE set by hand as it does not abide by ./configure
 	export CROSS_COMPILE=${TARGET_PREFIX}
+
+	# this is used for the header (#!/usr/bin/python) of the install python scripts
+	export PYTHONPATH="/usr/bin/python"
 }
 
 do_configure() {
@@ -538,6 +456,9 @@ do_compile_prepend() {
 		echo \#define __stub___kernel_sinl >> ${S}/tools/firmware/rombios/gnu/stubs-32.h
 		echo \#define __stub___kernel_tanl >> ${S}/tools/firmware/rombios/gnu/stubs-32.h
 	fi
+
+	# this is used for the header (#!/usr/bin/python) of the install python scripts
+	export PYTHONPATH="/usr/bin/python"
 }
 
 do_compile() {
@@ -571,10 +492,36 @@ do_install_prepend() {
 		echo \#define __stub___kernel_sinl >> ${S}/tools/firmware/rombios/gnu/stubs-32.h
 		echo \#define __stub___kernel_tanl >> ${S}/tools/firmware/rombios/gnu/stubs-32.h
 	fi
+
+	# this is used for the header (#!/usr/bin/python) of the install python scripts
+	export PYTHONPATH="/usr/bin/python"
 }
 
 do_install() {
 	oe_runmake DESTDIR="${D}" install
+
+	# install volatiles bits
+	install -d ${D}${sysconfdir}/default/volatiles
+	echo "d root root 0755 ${localstatedir}/run/xenstored none" \
+	     > ${D}${sysconfdir}/default/volatiles/99_xen
+	echo "d root root 0755 ${localstatedir}/run/xend none" \
+	     >> ${D}${sysconfdir}/default/volatiles/99_xen
+	echo "d root root 0755 ${localstatedir}/run/xend/boot none" \
+	     >> ${D}${sysconfdir}/default/volatiles/99_xen
+	echo "d root root 0755 ${localstatedir}/run/xen none" \
+	     >> ${D}${sysconfdir}/default/volatiles/99_xen
+	echo "d root root 0755 ${localstatedir}/log/xen none" \
+	     >> ${D}${sysconfdir}/default/volatiles/99_xen
+	echo "d root root 0755 ${localstatedir}/lock/xen none" \
+	     >> ${D}${sysconfdir}/default/volatiles/99_xen
+	echo "d root root 0755 ${localstatedir}/lock/subsys none" \
+	     >> ${D}${sysconfdir}/default/volatiles/99_xen
+}
+
+pkg_postinst_${PN}-base() {
+	if [ -z "$D" ] && [ -e /etc/init.d/populate-volatile.sh ] ; then
+		/etc/init.d/populate-volatile.sh update
+	fi
 }
 
 sysroot_stage_all_append() {
