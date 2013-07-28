@@ -17,10 +17,10 @@ COMPATIBLE_HOST = '(x86_64.*|i.86.*).*-linux'
 
 inherit autotools gettext setuptools update-rc.d
 
-DEPENDS = "util-linux util-linux-native file-native zlib ncurses openssl bison-native flex-native gettext dev86-native iasl-native pciutils virtual/libgl virtual/libsdl bridge-utils iproute2 procps yajl pixman python"
+DEPENDS = "util-linux util-linux-native file-native zlib ncurses openssl bison-native flex-native gettext dev86-native iasl-native pciutils virtual/libgl virtual/libsdl bridge-utils iproute2 procps yajl pixman python xz-native"
 
 RDEPENDS_xen-base = "\
-	libgcc pciutils bridge-utils iproute2 util-linux udev procps bash coreutils python python-core python-shell python-pprint perl \
+	libgcc pciutils bridge-utils iproute2 util-linux udev procps bash coreutils python python-core python-shell python-pprint perl xz \
 	${PN}-doc \
 	${PN}-libblktapctl \
 	${PN}-libxenguest \
