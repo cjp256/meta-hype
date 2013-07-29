@@ -1,6 +1,6 @@
 # measured, read-only rootfs
 
-include ${TOPDIR}/../meta-measured/recipes-tpm/images/core-image-tpm.inc
+include core-image-tpm.inc
 
 IMAGE_INSTALL += "\
     tboot-utils \
