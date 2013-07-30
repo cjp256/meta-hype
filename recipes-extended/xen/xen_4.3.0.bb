@@ -20,7 +20,7 @@ inherit autotools gettext setuptools update-rc.d
 DEPENDS = "util-linux util-linux-native file-native zlib ncurses openssl bison-native flex-native gettext dev86-native iasl-native pciutils virtual/libgl virtual/libsdl bridge-utils iproute2 procps yajl pixman python xz-native"
 
 RDEPENDS_xen-base = "\
-	libgcc pciutils bridge-utils iproute2 util-linux udev procps bash coreutils python python-core python-shell python-pprint perl xz \
+	libgcc pciutils bridge-utils iproute2 util-linux udev procps bash coreutils python python-core python-shell python-pprint perl xz qemu \
 	${PN}-doc \
 	${PN}-libblktapctl \
 	${PN}-libxenguest \
@@ -34,13 +34,8 @@ RDEPENDS_xen-base = "\
 	${PN}-libblktap \
 	${PN}-libfsimage \
 	${PN}-fsimage \
-	${PN}-keymaps-base \
-	${PN}-keymaps \
 	${PN}-python \
-	${PN}-bios-ppc \
-	${PN}-bios-sparc \
  	${PN}-hvmloader \
-	${PN}-palcode-clipper \
 	${PN}-xen-watchdog \
 	${PN}-xencommons \
 	${PN}-xendomains \
@@ -146,27 +141,6 @@ FILES_${PN}-libfsimage-dev = "/usr/lib/libfsimage.so"
 
 FILES_${PN}-fsimage = "/usr/lib/fs/*/*fsimage.so"
 
-INSANE_SKIP_${PN}-bios-sparc = "arch"
-FILES_${PN}-bios-sparc = "\
-	/usr/share/xen/qemu/openbios-sparc64 \
-	/usr/share/xen/qemu/openbios-sparc32 \
-	/usr/share/qemu-xen/qemu/openbios-sparc64 \
-	/usr/share/qemu-xen/qemu/openbios-sparc32 \
-	"
-
-INSANE_SKIP_${PN}-bios-ppc = "arch"
-FILES_${PN}-bios-ppc = "\
-	/usr/share/xen/qemu/openbios-ppc \
-	/usr/share/qemu-xen/qemu/openbios-ppc \
-	/usr/share/xen/qemu/ppc_rom.bin \
-	/usr/share/qemu-xen/qemu/openbios-pp \
-	"
-
-INSANE_SKIP_${PN}-palcode-clipper = "arch"
-FILES_${PN}-palcode-clipper = "\
-	/usr/share/qemu-xen/qemu/palcode-clipper \
-	"
-
 INSANE_SKIP_${PN}-hvmloader = "arch"
 FILES_${PN}-hvmloader = "\
 	/usr/lib/xen/boot/hvmloader \
@@ -185,20 +159,6 @@ FILES_${PN}-dev = "\
 	/usr/include \
 	"
 
-FILES_${PN}-keymaps-base = "\
-	/usr/share/xen/qemu/keymaps/common \
-	/usr/share/xen/qemu/keymaps/modifiers \
-	/usr/share/xen/qemu/keymaps/en-us \
-	/usr/share/qemu-xen/qemu/keymaps/common \
-	/usr/share/qemu-xen/qemu/keymaps/modifiers \
-	/usr/share/qemu-xen/qemu/keymaps/en-us \
-	"
-
-FILES_${PN}-keymaps = "\
-	/usr/share/xen/qemu/keymaps \
-	/usr/share/qemu-xen/qemu/keymaps \
-	"
-
 FILES_${PN}-volatiles = "\
 	/var/log \
 	/var/run \
@@ -208,186 +168,154 @@ FILES_${PN}-volatiles = "\
 
 FILES_${PN}-base = "\
 	/boot \
-	/var/xen \
-	/var/xen/dump \
-	/var/lib/xenstored \
-	/var/lib/xen \
-	/var/lib/xen/xenpaging \
-	/usr/lib/xen/bin/qemu-img \
-	/usr/lib/xen/bin/qemu-nbd \
-	/usr/lib/xen/bin/qemu-ga \
-	/usr/lib/xen/bin/xenpvnetboot \
-	/usr/lib/xen/bin/pygrub \
-	/usr/lib/xen/bin/lsevtchn \
-	/usr/lib/xen/bin/qemu-io \
-	/usr/lib/xen/bin/xenctx \
-	/usr/lib/xen/bin/xc_restore \
-	/usr/lib/xen/bin/qemu-system-i386 \
-	/usr/lib/xen/bin/qemu-dm \
-	/usr/lib/xen/bin/xc_save \
-	/usr/lib/xen/bin/virtfs-proxy-helper \
-	/usr/lib/xen/bin/xenconsole \
-	/usr/lib/xen/bin/libxl-save-helper \
-	/usr/lib/xen/bin/readnotes \
-	/usr/lib/xen/bin/xenpaging \
-	/usr/sbin/tap-ctl \
-	/usr/sbin/xencov \
-	/usr/sbin/flask-set-bool \
-	/usr/sbin/vhd-util \
-	/usr/sbin/xen-tmem-list-parse \
-	/usr/sbin/xenstored \
-	/usr/sbin/xm \
-	/usr/sbin/flask-label-pci \
-	/usr/sbin/xenmon.py \
-	/usr/sbin/xen-hptool \
-	/usr/sbin/xsview \
-	/usr/sbin/xend \
-	/usr/sbin/blktapctrl \
-	/usr/sbin/tapdisk-stream \
-	/usr/sbin/xen-ringwatch \
-	/usr/sbin/xenpm \
-	/usr/sbin/kdd \
-	/usr/sbin/xen-bugtool \
-	/usr/sbin/lock-util \
-	/usr/sbin/xenbaked \
-	/usr/sbin/xen-hvmcrash \
-	/usr/sbin/vhd-update \
-	/usr/sbin/qcow2raw \
-	/usr/sbin/xl \
-	/usr/sbin/tapdisk2 \
-	/usr/sbin/tapdisk-diff \
-	/usr/sbin/xentrace_setmask \
-	/usr/sbin/tapdisk \
-	/usr/sbin/xenwatchdogd \
-	/usr/sbin/xenlockprof \
-	/usr/sbin/gtraceview \
-	/usr/sbin/td-util \
-	/usr/sbin/tapdisk-client \
-	/usr/sbin/qcow-create \
-	/usr/sbin/xen-hvmctx \
-	/usr/sbin/xenpmd \
-	/usr/sbin/xen-python-path \
-	/usr/sbin/xentop \
-	/usr/sbin/flask-setenforce \
-	/usr/sbin/xenperf \
-	/usr/sbin/img2qcow \
-	/usr/sbin/gdbsx \
-	/usr/sbin/flask-loadpolicy \
-	/usr/sbin/gtracestat \
-	/usr/sbin/flask-get-bool \
-	/usr/sbin/xenconsoled \
-	/usr/sbin/flask-getenforce \
-	/usr/sbin/xen-lowmemd \
-	/usr/libexec/qemu-bridge-helper \
-	/usr/etc/qemu/target-x86_64.conf \
-	/usr/share/xen/create.dtd \
-	/usr/share/xen/qemu/bamboo.dtb \
-	/usr/share/xen/qemu/pxe-pcnet.bin \
-	/usr/share/xen/qemu/pxe-ne2k_pci.bin \
-	/usr/share/xen/qemu/video.x \
-	/usr/share/xen/qemu/vgabios-cirrus.bin \
-	/usr/share/xen/qemu/pxe-rtl8139.bin \
-	/usr/share/xen/qemu/bios.bin \
-	/usr/share/xen/qemu/pxe-e1000.bin \
-	/usr/share/xen/qemu/ppc_rom.bin \
-	/usr/share/xen/qemu/vgabios.bin \
-	/usr/share/qemu-xen/qemu/bamboo.dtb \
-	/usr/share/qemu-xen/qemu/pxe-pcnet.rom \
-	/usr/share/qemu-xen/qemu/vgabios-vmware.bin \
-	/usr/share/qemu-xen/qemu/pxe-eepro100.rom \
-	/usr/share/qemu-xen/qemu/pxe-e1000.rom \
-	/usr/share/qemu-xen/qemu/multiboot.bin \
-	/usr/share/qemu-xen/qemu/vgabios-cirrus.bin \
-	/usr/share/qemu-xen/qemu/bios.bin \
-	/usr/share/qemu-xen/qemu/vgabios-stdvga.bin \
-	/usr/share/qemu-xen/qemu/pxe-ne2k_pci.rom \
-	/usr/share/qemu-xen/qemu/spapr-rtas.bin \
-	/usr/share/qemu-xen/qemu/slof.bin \
-	/usr/share/qemu-xen/qemu/vgabios-qxl.bin \
-	/usr/share/qemu-xen/qemu/pxe-rtl8139.rom \
-	/usr/share/qemu-xen/qemu/pxe-virtio.rom \
-	/usr/share/qemu-xen/qemu/kvmvapic.bin \
-	/usr/share/qemu-xen/qemu/petalogix-s3adsp1800.dtb \
-	/usr/share/qemu-xen/qemu/sgabios.bin \
-	/usr/share/qemu-xen/qemu/linuxboot.bin \
-	/usr/share/qemu-xen/qemu/qemu-icon.bmp \
-	/usr/share/qemu-xen/qemu/ppc_rom.bin \
-	/usr/share/qemu-xen/qemu/vgabios.bin \
-	/usr/share/qemu-xen/qemu/s390-zipl.rom \
-	/usr/share/qemu-xen/qemu/petalogix-ml605.dtb \
-	/usr/bin/remus \
-	/usr/bin/qemu-nbd-xen \
-	/usr/bin/xenstore-chmod \
-	/usr/bin/xencov_split \
-	/usr/bin/qemu-img-xen \
+	/boot/xen-4.3.0.gz \
+	/boot/xen-4.3.gz \
+	/boot/xen-4.gz \
+	/boot/xen.gz \
+	/boot/xen-syms-4.3.0 \
+	/etc/bash_completion.d \
+	/etc/bash_completion.d/xl.sh \
+	/etc/default \
+	/etc/default/volatiles \
+	/etc/default/volatiles/99_xen \
+	/etc/default/xencommons \
+	/etc/default/xendomains \
+	/etc/udev \
+	/etc/udev/rules.d \
+	/etc/udev/rules.d/xen-backend.rules \
+	/etc/udev/rules.d/xend.rules \
+	/etc/xen \
+	/etc/xen/auto \
+	/etc/xen/cpupool \
+	/etc/xen/README \
+	/etc/xen/README.incompatibilities \
+	/etc/xen/scripts \
+	/etc/xen/scripts/blktap \
+	/etc/xen/scripts/block \
+	/etc/xen/scripts/block-common.sh \
+	/etc/xen/scripts/block-enbd \
+	/etc/xen/scripts/block-iscsi \
+	/etc/xen/scripts/block-nbd \
+	/etc/xen/scripts/external-device-migrate \
+	/etc/xen/scripts/hotplugpath.sh \
+	/etc/xen/scripts/locking.sh \
+	/etc/xen/scripts/logging.sh \
+	/etc/xen/scripts/network-bridge \
+	/etc/xen/scripts/network-nat \
+	/etc/xen/scripts/network-route \
+	/etc/xen/scripts/vif2 \
+	/etc/xen/scripts/vif-bridge \
+	/etc/xen/scripts/vif-common.sh \
+	/etc/xen/scripts/vif-nat \
+	/etc/xen/scripts/vif-openvswitch \
+	/etc/xen/scripts/vif-route \
+	/etc/xen/scripts/vif-setup \
+	/etc/xen/scripts/vscsi \
+	/etc/xen/scripts/xen-hotplug-cleanup \
+	/etc/xen/scripts/xen-hotplug-common.sh \
+	/etc/xen/scripts/xen-network-common.sh \
+	/etc/xen/scripts/xen-script-common.sh \
+	/etc/xen/xend-config.sxp \
+	/etc/xen/xend-pci-permissive.sxp \
+	/etc/xen/xend-pci-quirks.sxp \
+	/etc/xen/xl.conf \
+	/etc/xen/xlexample.hvm \
+	/etc/xen/xlexample.pvlinux \
+	/etc/xen/xm-config.xml \
+	/etc/xen/xmexample1 \
+	/etc/xen/xmexample2 \
+	/etc/xen/xmexample3 \
+	/etc/xen/xmexample.hvm \
+	/etc/xen/xmexample.hvm-stubdom \
+	/etc/xen/xmexample.nbd \
+	/etc/xen/xmexample.pv-grub \
+	/etc/xen/xmexample.vti \
 	/usr/bin/pygrub \
-	/usr/bin/xenstore-rm \
+	/usr/bin/remus \
+	/usr/bin/xencons \
+	/usr/bin/xencov_split \
 	/usr/bin/xen-detect \
-	/usr/bin/xentrace_format \
-	/usr/bin/xenstore-write \
 	/usr/bin/xenstore \
-	/usr/bin/xenstore-watch \
-	/usr/bin/xentrace_setsize \
-	/usr/bin/xenstore-read \
+	/usr/bin/xenstore-chmod \
 	/usr/bin/xenstore-control \
-	/usr/bin/xentrace \
 	/usr/bin/xenstore-exists \
 	/usr/bin/xenstore-list \
 	/usr/bin/xenstore-ls \
-	/usr/bin/xencons \
-	/etc/udev/rules.d/xen-backend.rules \
-	/etc/udev/rules.d/xend.rules \
-	/etc/bash_completion.d/xl.sh \
-	/etc/default \
-	/etc/default/xencommons \
-	/etc/default/xendomains \
-	/etc/xen \
-	/etc/xen/xend-pci-permissive.sxp \
-	/etc/xen/xmexample1 \
-	/etc/xen/xmexample.nbd \
-	/etc/xen/xmexample3 \
-	/etc/xen/xlexample.hvm \
-	/etc/xen/xmexample.hvm-stubdom \
-	/etc/xen/auto \
-	/etc/xen/xmexample2 \
-	/etc/xen/README.incompatibilities \
-	/etc/xen/xend-pci-quirks.sxp \
-	/etc/xen/xlexample.pvlinux \
-	/etc/xen/xl.conf \
-	/etc/xen/xmexample.vti \
-	/etc/xen/README \
-	/etc/xen/xmexample.pv-grub \
-	/etc/xen/cpupool \
-	/etc/xen/scripts \
-	/etc/xen/scripts/hotplugpath.sh \
-	/etc/xen/scripts/network-route \
-	/etc/xen/scripts/block-iscsi \
-	/etc/xen/scripts/xen-hotplug-common.sh \
-	/etc/xen/scripts/block \
-	/etc/xen/scripts/external-device-migrate \
-	/etc/xen/scripts/xen-network-common.sh \
-	/etc/xen/scripts/vif-openvswitch \
-	/etc/xen/scripts/block-nbd \
-	/etc/xen/scripts/vif-bridge \
-	/etc/xen/scripts/network-bridge \
-	/etc/xen/scripts/vif-common.sh \
-	/etc/xen/scripts/qemu-ifup \
-	/etc/xen/scripts/network-nat \
-	/etc/xen/scripts/xen-hotplug-cleanup \
-	/etc/xen/scripts/vscsi \
-	/etc/xen/scripts/block-enbd \
-	/etc/xen/scripts/block-common.sh \
-	/etc/xen/scripts/vif-nat \
-	/etc/xen/scripts/vif-setup \
-	/etc/xen/scripts/blktap \
-	/etc/xen/scripts/locking.sh \
-	/etc/xen/scripts/vif-route \
-	/etc/xen/scripts/logging.sh \
-	/etc/xen/scripts/vif2 \
-	/etc/xen/scripts/xen-script-common.sh \
-	/etc/xen/xm-config.xml \
-	/etc/xen/xend-config.sxp \
-	/etc/xen/xmexample.hvm \
+	/usr/bin/xenstore-read \
+	/usr/bin/xenstore-rm \
+	/usr/bin/xenstore-watch \
+	/usr/bin/xenstore-write \
+	/usr/bin/xentrace \
+	/usr/bin/xentrace_format \
+	/usr/bin/xentrace_setsize \
+	/usr/lib/xen/bin/libxl-save-helper \
+	/usr/lib/xen/bin/lsevtchn \
+	/usr/lib/xen/bin/pygrub \
+	/usr/lib/xen/bin/readnotes \
+	/usr/lib/xen/bin/xc_restore \
+	/usr/lib/xen/bin/xc_save \
+	/usr/lib/xen/bin/xenconsole \
+	/usr/lib/xen/bin/xenctx \
+	/usr/lib/xen/bin/xenpaging \
+	/usr/lib/xen/bin/xenpvnetboot \
+	/usr/sbin/blktapctrl \
+	/usr/sbin/flask-get-bool \
+	/usr/sbin/flask-getenforce \
+	/usr/sbin/flask-label-pci \
+	/usr/sbin/flask-loadpolicy \
+	/usr/sbin/flask-set-bool \
+	/usr/sbin/flask-setenforce \
+	/usr/sbin/gdbsx \
+	/usr/sbin/gtracestat \
+	/usr/sbin/gtraceview \
+	/usr/sbin/img2qcow \
+	/usr/sbin/kdd \
+	/usr/sbin/lock-util \
+	/usr/sbin/qcow2raw \
+	/usr/sbin/qcow-create \
+	/usr/sbin/tap-ctl \
+	/usr/sbin/tapdisk \
+	/usr/sbin/tapdisk2 \
+	/usr/sbin/tapdisk-client \
+	/usr/sbin/tapdisk-diff \
+	/usr/sbin/tapdisk-stream \
+	/usr/sbin/td-util \
+	/usr/sbin/vhd-update \
+	/usr/sbin/vhd-util \
+	/usr/sbin/xenbaked \
+	/usr/sbin/xen-bugtool \
+	/usr/sbin/xenconsoled \
+	/usr/sbin/xencov \
+	/usr/sbin/xend \
+	/usr/sbin/xen-hptool \
+	/usr/sbin/xen-hvmcrash \
+	/usr/sbin/xen-hvmctx \
+	/usr/sbin/xenlockprof \
+	/usr/sbin/xen-lowmemd \
+	/usr/sbin/xenmon.py \
+	/usr/sbin/xenperf \
+	/usr/sbin/xenpm \
+	/usr/sbin/xenpmd \
+	/usr/sbin/xen-python-path \
+	/usr/sbin/xen-ringwatch \
+	/usr/sbin/xenstored \
+	/usr/sbin/xen-tmem-list-parse \
+	/usr/sbin/xentop \
+	/usr/sbin/xentrace_setmask \
+	/usr/sbin/xenwatchdogd \
+	/usr/sbin/xl \
+	/usr/sbin/xm \
+	/usr/sbin/xsview \
+	/usr/share/xen \
+	/usr/share/xen/create.dtd \
+	/var/lib \
+	/var/lib/xen \
+	/var/lib/xenstored \
+	/var/lib/xen/xenpaging \
+	/var/xen \
+	/var/xen/dump \
+	/usr/lib/xen/bin/qemu-system-i386 \
+	/usr/lib/xen/bin/qemu-system-x86_64 \
 	"
 
 FILES_${PN}-xencommons += "/etc/init.d/xencommons"
@@ -426,6 +354,9 @@ do_configure_prepend() {
 
 	# this is used for the header (#!/usr/bin/python) of the install python scripts
 	export PYTHONPATH="/usr/bin/python"
+
+	# do not build qemu
+	export CONFIG_IOEMU="n"
 }
 
 do_configure() {
@@ -459,6 +390,9 @@ do_compile_prepend() {
 
 	# this is used for the header (#!/usr/bin/python) of the install python scripts
 	export PYTHONPATH="/usr/bin/python"
+
+	# do not build qemu
+	export CONFIG_IOEMU="n"
 }
 
 do_compile() {
@@ -495,6 +429,9 @@ do_install_prepend() {
 
 	# this is used for the header (#!/usr/bin/python) of the install python scripts
 	export PYTHONPATH="/usr/bin/python"
+
+	# do not build qemu
+	export CONFIG_IOEMU="n"
 }
 
 do_install() {
@@ -516,6 +453,14 @@ do_install() {
 	     >> ${D}${sysconfdir}/default/volatiles/99_xen
 	echo "d root root 0755 ${localstatedir}/lock/subsys none" \
 	     >> ${D}${sysconfdir}/default/volatiles/99_xen
+
+	# workaround to support upstream qemu
+	if [ ! -e ${D}/usr/lib/xen/bin/qemu-system-i386 ] ; then
+		ln -sf /usr/bin/qemu-system-i386 ${D}/usr/lib/xen/bin/qemu-system-i386
+	fi
+	if [ ! -e ${D}/usr/lib/xen/bin/qemu-system-x86_64 ] ; then
+		ln -sf /usr/bin/qemu-system-x86_64 ${D}/usr/lib/xen/bin/qemu-system-x86_64
+	fi
 }
 
 pkg_postinst_${PN}-base() {
