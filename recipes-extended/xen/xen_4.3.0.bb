@@ -316,6 +316,7 @@ FILES_${PN}-base = "\
 	/var/xen/dump \
 	/usr/lib/xen/bin/qemu-system-i386 \
 	/usr/lib/xen/bin/qemu-system-x86_64 \
+	/etc/sysconfig/xendomains \
 	"
 
 FILES_${PN}-xencommons += "/etc/init.d/xencommons"
@@ -461,6 +462,10 @@ do_install() {
 	if [ ! -e ${D}/usr/lib/xen/bin/qemu-system-x86_64 ] ; then
 		ln -sf /usr/bin/qemu-system-x86_64 ${D}/usr/lib/xen/bin/qemu-system-x86_64
 	fi
+
+	# workaround for xendomains script which searchs sysconfig if directory exists
+	install -d ${D}${sysconfdir}/sysconfig
+	ln -sf ${sysconfdir}/default/xendomains ${D}${sysconfdir}/sysconfig/xendomains
 }
 
 pkg_postinst_${PN}-base() {
