@@ -102,6 +102,13 @@ find_rootimg() {
             if [ -f /media/$device/$rootimg ] ; then
                 ROOT_IMAGE_PATH=/media/$device/$rootimg
                 echo "found root image: $ROOT_IMAGE_PATH"
+
+		# support upgrading rootfs for online systems by checking for rootfs.img.update
+		if [ -f $ROOT_IMAGE_PATH.update ]; then
+			echo "found root image update: $ROOT_IMAGE_PATH.update"
+			mv $ROOT_IMAGE_PATH.update $ROOT_IMAGE_PATH
+		fi
+
                 break
             fi
         done
