@@ -13,6 +13,8 @@ IMAGE_INSTALL += "\
     cryptsetup \
     lsbinitscripts \
     xen-base \
+    xen-qemu \
+    qemu \
 "
 
 # Tidy up bits not needed in the image...
