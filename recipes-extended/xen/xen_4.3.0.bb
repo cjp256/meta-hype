@@ -20,7 +20,7 @@ inherit autotools gettext setuptools update-rc.d
 DEPENDS = "util-linux util-linux-native file-native zlib ncurses openssl bison-native flex-native gettext dev86-native iasl-native pciutils virtual/libgl virtual/libsdl bridge-utils iproute2 procps yajl pixman python xz-native"
 
 RDEPENDS_xen-base = "\
-	libgcc pciutils bridge-utils iproute2 util-linux udev procps bash coreutils python python-core python-shell python-pprint perl xz qemu \
+	libgcc pciutils bridge-utils iproute2 util-linux udev procps bash coreutils python python-core python-shell python-pprint perl xz \
 	${PN}-doc \
 	${PN}-libblktapctl \
 	${PN}-libxenguest \
@@ -72,6 +72,7 @@ PACKAGES = "\
 	${PN}-xencommons \
 	${PN}-xendomains \
 	${PN}-volatiles \
+	${PN}-qemu \
 	"
 
 FILES_${PN}-dbg += "\
@@ -306,7 +307,6 @@ FILES_${PN}-base = "\
 	/usr/sbin/xl \
 	/usr/sbin/xm \
 	/usr/sbin/xsview \
-	/usr/share/xen \
 	/usr/share/xen/create.dtd \
 	/var/lib \
 	/var/lib/xen \
@@ -314,9 +314,93 @@ FILES_${PN}-base = "\
 	/var/lib/xen/xenpaging \
 	/var/xen \
 	/var/xen/dump \
+	/etc/sysconfig/xendomains \
+	"
+
+INSANE_SKIP_${PN}-qemu = "arch"
+FILES_${PN}-qemu = " \
+	/usr/etc \
+	/usr/share/xen/qemu \
 	/usr/lib/xen/bin/qemu-system-i386 \
 	/usr/lib/xen/bin/qemu-system-x86_64 \
-	/etc/sysconfig/xendomains \
+	/usr/lib/xen/bin/qemu-img \
+	/usr/lib/xen/bin/qemu-nbd \
+	/usr/lib/xen/bin/qemu-ga \
+	/usr/lib/xen/bin/qemu-io \
+	/usr/lib/xen/bin/qemu-dm \
+	/usr/lib/xen/bin/virtfs-proxy-helper \
+	/usr/libexec/qemu-bridge-helper \
+	/usr/etc/qemu \
+	/usr/etc/qemu/target-x86_64.conf \
+	/usr/share/qemu-xen \
+	/usr/share/qemu-xen/qemu \
+	/usr/share/qemu-xen/qemu/bamboo.dtb \
+	/usr/share/qemu-xen/qemu/pxe-pcnet.rom \
+	/usr/share/qemu-xen/qemu/vgabios-vmware.bin \
+	/usr/share/qemu-xen/qemu/pxe-eepro100.rom \
+	/usr/share/qemu-xen/qemu/pxe-e1000.rom \
+	/usr/share/qemu-xen/qemu/openbios-ppc \
+	/usr/share/qemu-xen/qemu/multiboot.bin \
+	/usr/share/qemu-xen/qemu/vgabios-cirrus.bin \
+	/usr/share/qemu-xen/qemu/bios.bin \
+	/usr/share/qemu-xen/qemu/vgabios-stdvga.bin \
+	/usr/share/qemu-xen/qemu/palcode-clipper \
+	/usr/share/qemu-xen/qemu/pxe-ne2k_pci.rom \
+	/usr/share/qemu-xen/qemu/spapr-rtas.bin \
+	/usr/share/qemu-xen/qemu/slof.bin \
+	/usr/share/qemu-xen/qemu/vgabios-qxl.bin \
+	/usr/share/qemu-xen/qemu/pxe-rtl8139.rom \
+	/usr/share/qemu-xen/qemu/openbios-sparc64 \
+	/usr/share/qemu-xen/qemu/pxe-virtio.rom \
+	/usr/share/qemu-xen/qemu/kvmvapic.bin \
+	/usr/share/qemu-xen/qemu/openbios-sparc32 \
+	/usr/share/qemu-xen/qemu/petalogix-s3adsp1800.dtb \
+	/usr/share/qemu-xen/qemu/sgabios.bin \
+	/usr/share/qemu-xen/qemu/linuxboot.bin \
+	/usr/share/qemu-xen/qemu/qemu-icon.bmp \
+	/usr/share/qemu-xen/qemu/ppc_rom.bin \
+	/usr/share/qemu-xen/qemu/vgabios.bin \
+	/usr/share/qemu-xen/qemu/s390-zipl.rom \
+	/usr/share/qemu-xen/qemu/petalogix-ml605.dtb \
+	/usr/share/qemu-xen/qemu/keymaps \
+	/usr/share/qemu-xen/qemu/keymaps/common \
+	/usr/share/qemu-xen/qemu/keymaps/th \
+	/usr/share/qemu-xen/qemu/keymaps/is \
+	/usr/share/qemu-xen/qemu/keymaps/en-gb \
+	/usr/share/qemu-xen/qemu/keymaps/ar \
+	/usr/share/qemu-xen/qemu/keymaps/fr-be \
+	/usr/share/qemu-xen/qemu/keymaps/ru \
+	/usr/share/qemu-xen/qemu/keymaps/hu \
+	/usr/share/qemu-xen/qemu/keymaps/de-ch \
+	/usr/share/qemu-xen/qemu/keymaps/no \
+	/usr/share/qemu-xen/qemu/keymaps/fr \
+	/usr/share/qemu-xen/qemu/keymaps/pl \
+	/usr/share/qemu-xen/qemu/keymaps/fr-ca \
+	/usr/share/qemu-xen/qemu/keymaps/de \
+	/usr/share/qemu-xen/qemu/keymaps/fr-ch \
+	/usr/share/qemu-xen/qemu/keymaps/bepo \
+	/usr/share/qemu-xen/qemu/keymaps/lv \
+	/usr/share/qemu-xen/qemu/keymaps/ja \
+	/usr/share/qemu-xen/qemu/keymaps/da \
+	/usr/share/qemu-xen/qemu/keymaps/lt \
+	/usr/share/qemu-xen/qemu/keymaps/hr \
+	/usr/share/qemu-xen/qemu/keymaps/es \
+	/usr/share/qemu-xen/qemu/keymaps/modifiers \
+	/usr/share/qemu-xen/qemu/keymaps/sl \
+	/usr/share/qemu-xen/qemu/keymaps/it \
+	/usr/share/qemu-xen/qemu/keymaps/nl \
+	/usr/share/qemu-xen/qemu/keymaps/fo \
+	/usr/share/qemu-xen/qemu/keymaps/mk \
+	/usr/share/qemu-xen/qemu/keymaps/pt-br \
+	/usr/share/qemu-xen/qemu/keymaps/tr \
+	/usr/share/qemu-xen/qemu/keymaps/sv \
+	/usr/share/qemu-xen/qemu/keymaps/fi \
+	/usr/share/qemu-xen/qemu/keymaps/en-us \
+	/usr/share/qemu-xen/qemu/keymaps/et \
+	/usr/share/qemu-xen/qemu/keymaps/nl-be \
+	/usr/share/qemu-xen/qemu/keymaps/pt \
+	/usr/bin/qemu-nbd-xen \
+	/usr/bin/qemu-img-xen \
 	"
 
 FILES_${PN}-xencommons += "/etc/init.d/xencommons"
@@ -344,7 +428,7 @@ do_configure_prepend() {
 	export HOST_SYS=${HOST_SYS}
 	export STAGING_INCDIR=${STAGING_INCDIR}
 	export STAGING_LIBDIR=${STAGING_LIBDIR}
-
+	
 	# XXX: legit? better way to do this? 
 	export XEN_TARGET_ARCH=`echo ${TARGET_ARCH} | sed -e s/i.86/x86_32/ \
                                 -e s/i86pc/x86_32/ -e s/amd64/x86_64/`
@@ -356,12 +440,15 @@ do_configure_prepend() {
 	# this is used for the header (#!/usr/bin/python) of the install python scripts
 	export PYTHONPATH="/usr/bin/python"
 
-	# do not build qemu
-	export CONFIG_IOEMU="n"
+	# fixup pciutils check hardcoded for /usr/include/pci
+	sed -i 's/\/usr\/include\/pci/$(STAGING_INCDIR)\/pci/g' ${S}/tools/qemu-xen-traditional/xen-hooks.mak
+
+	# pci passthrough isn't built by default?
+	sed -i 's/--enable-xen --target-list=i386-softmmu/--enable-xen --enable-xen-pci-passthrough --target-list=i386-softmmu/g' ${S}/tools/Makefile
 }
 
 do_configure() {
-	./configure --exec-prefix=/usr --prefix=/usr --host=${HOST_STRING} --disable-seabios --disable-stubdom --disable-ioemu-stubdom --disable-pv-grub --disable-xenstore-stubdom
+	./configure --exec-prefix=/usr --prefix=/usr --host=${HOST_STRING} --disable-stubdom --disable-ioemu-stubdom --disable-pv-grub --disable-xenstore-stubdom
 }
 
 do_compile_prepend() {
@@ -370,6 +457,11 @@ do_compile_prepend() {
 	export STAGING_INCDIR=${STAGING_INCDIR}
 	export STAGING_LIBDIR=${STAGING_LIBDIR}
 
+	# seabios forcefully sets HOSTCC to CC - fixup to allow it to build native conf executable
+	export HOSTCC=${BUILD_CC}
+	make -C ${S}/tools/firmware seabios-dir
+	sed -i 's/export HOSTCC.*$(CC)/export HOSTCC ?= $(CC)/g' ${S}/tools/firmware/seabios-dir/Makefile
+	
 	# make xen requires CROSS_COMPILE set by hand as it does not abide by ./configure
 	export CROSS_COMPILE=${TARGET_PREFIX}
 	export LDFLAGS=""
@@ -391,9 +483,6 @@ do_compile_prepend() {
 
 	# this is used for the header (#!/usr/bin/python) of the install python scripts
 	export PYTHONPATH="/usr/bin/python"
-
-	# do not build qemu
-	export CONFIG_IOEMU="n"
 }
 
 do_compile() {
@@ -430,9 +519,6 @@ do_install_prepend() {
 
 	# this is used for the header (#!/usr/bin/python) of the install python scripts
 	export PYTHONPATH="/usr/bin/python"
-
-	# do not build qemu
-	export CONFIG_IOEMU="n"
 }
 
 do_install() {
@@ -454,14 +540,6 @@ do_install() {
 	     >> ${D}${sysconfdir}/default/volatiles/99_xen
 	echo "d root root 0755 ${localstatedir}/lock/subsys none" \
 	     >> ${D}${sysconfdir}/default/volatiles/99_xen
-
-	# workaround to support upstream qemu
-	if [ ! -e ${D}/usr/lib/xen/bin/qemu-system-i386 ] ; then
-		ln -sf /usr/bin/qemu-system-i386 ${D}/usr/lib/xen/bin/qemu-system-i386
-	fi
-	if [ ! -e ${D}/usr/lib/xen/bin/qemu-system-x86_64 ] ; then
-		ln -sf /usr/bin/qemu-system-x86_64 ${D}/usr/lib/xen/bin/qemu-system-x86_64
-	fi
 
 	# workaround for xendomains script which searchs sysconfig if directory exists
 	install -d ${D}${sysconfdir}/sysconfig
