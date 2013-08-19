@@ -13,7 +13,7 @@ SRC_URI[sha256sum] = "e1e9faabe4886e2227aacdbde74410653b233d66642ca1972a860cbec6
 
 S = "${WORKDIR}/xen-${PV}"
 
-COMPATIBLE_HOST = '(x86_64.*|i.86.*).*-linux'
+COMPATIBLE_HOST = '(x86_64.*).*-linux'
 
 inherit autotools gettext setuptools update-rc.d
 
@@ -429,9 +429,8 @@ do_configure_prepend() {
 	export STAGING_INCDIR=${STAGING_INCDIR}
 	export STAGING_LIBDIR=${STAGING_LIBDIR}
 	
-	# XXX: legit? better way to do this? 
-	export XEN_TARGET_ARCH=`echo ${TARGET_ARCH} | sed -e s/i.86/x86_32/ \
-                                -e s/i86pc/x86_32/ -e s/amd64/x86_64/`
+	export XEN_TARGET_ARCH=x86_64
+	export XEN_COMPILE_ARCH=x86_64
 	export HOST_STRING="${XEN_TARGET_ARCH}-oe-gnu"
 
 	# make xen requires CROSS_COMPILE set by hand as it does not abide by ./configure
@@ -456,6 +455,9 @@ do_compile_prepend() {
 	export HOST_SYS=${HOST_SYS}
 	export STAGING_INCDIR=${STAGING_INCDIR}
 	export STAGING_LIBDIR=${STAGING_LIBDIR}
+
+	export XEN_TARGET_ARCH=x86_64
+	export XEN_COMPILE_ARCH=x86_64
 
 	# seabios forcefully sets HOSTCC to CC - fixup to allow it to build native conf executable
 	export HOSTCC=${BUILD_CC}
@@ -483,6 +485,9 @@ do_compile_prepend() {
 
 	# this is used for the header (#!/usr/bin/python) of the install python scripts
 	export PYTHONPATH="/usr/bin/python"
+
+	# fixup for qemu to cross compile
+	sed -i 's/configure --d/configure --cross-prefix=${TARGET_PREFIX} --d/g' ${S}/tools/qemu-xen-traditional/xen-setup
 }
 
 do_compile() {
@@ -495,8 +500,8 @@ do_install_prepend() {
 	export STAGING_INCDIR=${STAGING_INCDIR}
 	export STAGING_LIBDIR=${STAGING_LIBDIR}
 
-	# fact of the matter is that the xen makefile will rebuild stuffs when doing a make install
-	# so everything needs to be redefined
+	export XEN_TARGET_ARCH=x86_64
+	export XEN_COMPILE_ARCH=x86_64
 
 	# make xen requires CROSS_COMPILE set by hand as it does not abide by ./configure
 	export CROSS_COMPILE=${TARGET_PREFIX}
