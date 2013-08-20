@@ -408,122 +408,78 @@ FILES_${PN}-xend += "/etc/init.d/xend"
 FILES_${PN}-xendomains += "/etc/init.d/xendomains"
 FILES_${PN}-xen-watchdog += "/etc/init.d/xen-watchdog"
 
-# Configure init.d scripts... 80 sounds like a good starting number.
+# configure init.d scripts
 INITSCRIPT_PACKAGES = "${PN}-xend ${PN}-xencommons ${PN}-xen-watchdog ${PN}-xendomains"
-
 INITSCRIPT_NAME_${PN}-xencommons = "xencommons"
 INITSCRIPT_PARAMS_${PN}-xencommons = "defaults 80"
-
 INITSCRIPT_NAME_${PN}-xen-watchdog = "xen-watchdog"
 INITSCRIPT_PARAMS_${PN}-xen-watchdog = "defaults 81"
-
 INITSCRIPT_NAME_${PN}-xend = "xend"
 INITSCRIPT_PARAMS_${PN}-xend = "defaults 82"
-
 INITSCRIPT_NAME_${PN}-xendomains = "xendomains"
 INITSCRIPT_PARAMS_${PN}-xendomains = "defaults 83"
 
-do_configure_prepend() {
-	export BUILD_SYS=${BUILD_SYS}
-	export HOST_SYS=${HOST_SYS}
-	export STAGING_INCDIR=${STAGING_INCDIR}
-	export STAGING_LIBDIR=${STAGING_LIBDIR}
-	
-	export XEN_TARGET_ARCH=x86_64
-	export XEN_COMPILE_ARCH=x86_64
-	export HOST_STRING="${XEN_TARGET_ARCH}-oe-gnu"
+#### REQUIRED ENVIRONMENT VARIABLES ####
+export BUILD_SYS
+export HOST_SYS
+export STAGING_INCDIR
+export STAGING_LIBDIR
 
-	# make xen requires CROSS_COMPILE set by hand as it does not abide by ./configure
-	export CROSS_COMPILE=${TARGET_PREFIX}
+# specify xen hypervisor to target x86_64 (x86_32 not supported)
+export XEN_TARGET_ARCH="x86_64"
+export XEN_COMPILE_ARCH="x86_64"
 
-	# this is used for the header (#!/usr/bin/python) of the install python scripts
-	export PYTHONPATH="/usr/bin/python"
+# this is used for the header (#!/usr/bin/python) of the install python scripts
+export PYTHONPATH="/usr/bin/python"
 
-	# fixup pciutils check hardcoded for /usr/include/pci
+# seabios forcefully sets HOSTCC to CC - fixup to allow it to build native conf executable
+export HOSTCC="${BUILD_CC}"
+
+# make xen requires CROSS_COMPILE set by hand as it does not abide by ./configure
+export CROSS_COMPILE="${TARGET_PREFIX}"
+
+# overide LDFLAGS to allow xen to build without: "x86_64-oe-linux-ld: unrecognized option '-Wl,-O1'"
+export LDFLAGS=""
+
+# this is used for the header (#!/usr/bin/python) of the install python scripts
+export PYTHONPATH="/usr/bin/python"
+
+do_configure() {
+	# fixup qemu-xen-traditional pciutils check hardcoded to test /usr/include/pci
 	sed -i 's/\/usr\/include\/pci/$(STAGING_INCDIR)\/pci/g' ${S}/tools/qemu-xen-traditional/xen-hooks.mak
 
 	# pci passthrough isn't built by default?
-	sed -i 's/--enable-xen --target-list=i386-softmmu/--enable-xen --enable-xen-pci-passthrough --target-list=i386-softmmu/g' ${S}/tools/Makefile
-}
-
-do_configure() {
-	./configure --exec-prefix=/usr --prefix=/usr --host=${HOST_STRING} --disable-stubdom --disable-ioemu-stubdom --disable-pv-grub --disable-xenstore-stubdom
-}
-
-do_compile_prepend() {
-	export BUILD_SYS=${BUILD_SYS}
-	export HOST_SYS=${HOST_SYS}
-	export STAGING_INCDIR=${STAGING_INCDIR}
-	export STAGING_LIBDIR=${STAGING_LIBDIR}
-
-	export XEN_TARGET_ARCH=x86_64
-	export XEN_COMPILE_ARCH=x86_64
-
-	# seabios forcefully sets HOSTCC to CC - fixup to allow it to build native conf executable
-	export HOSTCC=${BUILD_CC}
-	make -C ${S}/tools/firmware seabios-dir
-	sed -i 's/export HOSTCC.*$(CC)/export HOSTCC ?= $(CC)/g' ${S}/tools/firmware/seabios-dir/Makefile
-	
-	# make xen requires CROSS_COMPILE set by hand as it does not abide by ./configure
-	export CROSS_COMPILE=${TARGET_PREFIX}
-	export LDFLAGS=""
-
-	test -d ${S}/tools/firmware/rombios/gnu || mkdir ${S}/tools/firmware/rombios/gnu
-	test -e ${S}/tools/firmware/rombios/32bit/gnu || ln -s ../gnu ${S}/tools/firmware/rombios/32bit/gnu
-	test -e ${S}/tools/firmware/hvmloader/gnu || ln -s ../rombios/gnu ${S}/tools/firmware/hvmloader/gnu
-	test -e ${S}/tools/firmware/hvmloader/acpi/gnu || ln -s ../../rombios/gnu ${S}/tools/firmware/hvmloader/acpi/gnu
-	test -d ${S}/tools/include || mkdir -p ${S}/tools/include
-	test -e ${S}/tools/include/gnu || ln -s ../firmware/rombios/gnu ${S}/tools/include/gnu
-
-	# No stubs-32 in our 64-bit sysroot - make it
-	if ! test -f ${STAGING_DIR_TARGET}/usr/include/gnu/stubs-32.h ; then
-		cat ${STAGING_DIR_TARGET}/usr/include/gnu/stubs-64.h | grep -v stub_bdflush | grep -v stub_getmsg | grep -v stub_putmsg > ${S}/tools/firmware/rombios/gnu/stubs-32.h
-		echo \#define __stub___kernel_cosl >> ${S}/tools/firmware/rombios/gnu/stubs-32.h
-		echo \#define __stub___kernel_sinl >> ${S}/tools/firmware/rombios/gnu/stubs-32.h
-		echo \#define __stub___kernel_tanl >> ${S}/tools/firmware/rombios/gnu/stubs-32.h
-	fi
-
-	# this is used for the header (#!/usr/bin/python) of the install python scripts
-	export PYTHONPATH="/usr/bin/python"
+	# sed -i 's/--enable-xen --target-list=i386-softmmu/--enable-xen --enable-xen-pci-passthrough --target-list=i386-softmmu/g' ${S}/tools/Makefile
 
 	# fixup for qemu to cross compile
 	sed -i 's/configure --d/configure --cross-prefix=${TARGET_PREFIX} --d/g' ${S}/tools/qemu-xen-traditional/xen-setup
+
+	# no stubs-32.h in our 64-bit sysroot - hack it in
+	#| In file included from /home/chris/git/hype-scripts/build/tmp.oe-hype-eglibc/sysroots/sugarbay/usr/include/features.h:399:0,
+	#|                  from /home/chris/git/hype-scripts/build/tmp.oe-hype-eglibc/sysroots/sugarbay/usr/include/stdint.h:25,
+	#|                  from /home/chris/git/hype-scripts/build/tmp.oe-hype-eglibc/sysroots/x86_64-linux/usr/lib/x86_64-oe-linux/gcc/x86_64-oe-linux/4.7.2/include/stdint.h:3,
+	#|                  from ../../../hvmloader/acpi/acpi2_0.h:21,
+	#|                  from ../util.h:4,
+	#|                  from tcgbios.c:27:
+	#| /home/chris/git/hype-scripts/build/tmp.oe-hype-eglibc/sysroots/sugarbay/usr/include/gnu/stubs.h:7:27: fatal error: gnu/stubs-32.h: No such file or directory	
+	test -d ${S}/tools/include/gnu || mkdir ${S}/tools/include/gnu
+	if ! test -f ${STAGING_DIR_TARGET}/usr/include/gnu/stubs-32.h ; then
+		cat ${STAGING_DIR_TARGET}/usr/include/gnu/stubs-64.h | grep -v stub_bdflush | grep -v stub_getmsg | grep -v stub_putmsg > ${S}/tools/include/gnu/stubs-32.h
+		echo \#define __stub___kernel_cosl >> ${S}/tools/include/gnu/stubs-32.h
+		echo \#define __stub___kernel_sinl >> ${S}/tools/include/gnu/stubs-32.h
+		echo \#define __stub___kernel_tanl >> ${S}/tools/include/gnu/stubs-32.h
+	fi
+
+	# do configure
+	./configure --exec-prefix=/usr --prefix=/usr --host=${HOST_SYS} --disable-stubdom --disable-ioemu-stubdom --disable-pv-grub --disable-xenstore-stubdom
+
+	# seabios needs a patch to specify correct compiler - pull and patch Makefile
+	make -C ${S}/tools/firmware seabios-dir
+	sed -i 's/export HOSTCC.*$(CC)/export HOSTCC ?= $(CC)/g' ${S}/tools/firmware/seabios-dir/Makefile
 }
 
 do_compile() {
 	oe_runmake
-}
-
-do_install_prepend() {
-	export BUILD_SYS=${BUILD_SYS}
-	export HOST_SYS=${HOST_SYS}
-	export STAGING_INCDIR=${STAGING_INCDIR}
-	export STAGING_LIBDIR=${STAGING_LIBDIR}
-
-	export XEN_TARGET_ARCH=x86_64
-	export XEN_COMPILE_ARCH=x86_64
-
-	# make xen requires CROSS_COMPILE set by hand as it does not abide by ./configure
-	export CROSS_COMPILE=${TARGET_PREFIX}
-	export LDFLAGS=""
-
-	test -d ${S}/tools/firmware/rombios/gnu || mkdir ${S}/tools/firmware/rombios/gnu
-	test -e ${S}/tools/firmware/rombios/32bit/gnu || ln -s ../gnu ${S}/tools/firmware/rombios/32bit/gnu
-	test -e ${S}/tools/firmware/hvmloader/gnu || ln -s ../rombios/gnu ${S}/tools/firmware/hvmloader/gnu
-	test -e ${S}/tools/firmware/hvmloader/acpi/gnu || ln -s ../../rombios/gnu ${S}/tools/firmware/hvmloader/acpi/gnu
-	test -d ${S}/tools/include || mkdir -p ${S}/tools/include
-	test -e ${S}/tools/include/gnu || ln -s ../firmware/rombios/gnu ${S}/tools/include/gnu
-
-	# No stubs-32 in our 64-bit sysroot - make it
-	if ! test -f ${STAGING_DIR_TARGET}/usr/include/gnu/stubs-32.h ; then
-		cat ${STAGING_DIR_TARGET}/usr/include/gnu/stubs-64.h | grep -v stub_bdflush | grep -v stub_getmsg | grep -v stub_putmsg > ${S}/tools/firmware/rombios/gnu/stubs-32.h
-		echo \#define __stub___kernel_cosl >> ${S}/tools/firmware/rombios/gnu/stubs-32.h
-		echo \#define __stub___kernel_sinl >> ${S}/tools/firmware/rombios/gnu/stubs-32.h
-		echo \#define __stub___kernel_tanl >> ${S}/tools/firmware/rombios/gnu/stubs-32.h
-	fi
-
-	# this is used for the header (#!/usr/bin/python) of the install python scripts
-	export PYTHONPATH="/usr/bin/python"
 }
 
 do_install() {
