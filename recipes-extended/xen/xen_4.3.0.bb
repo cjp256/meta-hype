@@ -37,7 +37,8 @@ RDEPENDS_xen-base = "\
 	${PN}-flask \
 	${PN}-fsimage \
  	${PN}-hvmloader \
-	${PN}-scripts \
+	${PN}-scripts-block \
+	${PN}-scripts-network \
 	${PN}-xenpaging \
 	${PN}-xen-watchdog \
 	${PN}-xencommons \
@@ -45,6 +46,17 @@ RDEPENDS_xen-base = "\
 	${PN}-xenstore \
 	${PN}-xenstored \
 	${PN}-xl \
+	"
+
+RDEPENDS_${PN}-scripts-block = "\
+	${PN}-scripts-common \
+	${PN}-udev \
+	"
+
+RDEPENDS_${PN}-scripts-network = "\
+	bridge-utils \
+	${PN}-scripts-common \
+	${PN}-udev \
 	"
 
 PACKAGES = "\
@@ -87,8 +99,11 @@ PACKAGES = "\
 	${PN}-python \
 	${PN}-qemu \
 	${PN}-remus \
-	${PN}-scripts \
+	${PN}-scripts-block \
+	${PN}-scripts-common \
+	${PN}-scripts-network \
 	${PN}-staticdev \
+	${PN}-udev \
 	${PN}-volatiles \
 	${PN}-xcutils \
 	${PN}-xencommons \
@@ -381,17 +396,7 @@ FILES_${PN}-remus = "\
 	/usr/bin/remus \
 	"
 
-FILES_${PN}-scripts = "\
-	/etc/xen/scripts/blktap \
-	/etc/xen/scripts/block \
-	/etc/xen/scripts/block-common.sh \
-	/etc/xen/scripts/block-enbd \
-	/etc/xen/scripts/block-iscsi \
-	/etc/xen/scripts/block-nbd \
-	/etc/xen/scripts/external-device-migrate \
-	/etc/xen/scripts/hotplugpath.sh \
-	/etc/xen/scripts/locking.sh \
-	/etc/xen/scripts/logging.sh \
+FILES_${PN}-scripts-network = " \
 	/etc/xen/scripts/network-bridge \
 	/etc/xen/scripts/network-nat \
 	/etc/xen/scripts/network-route \
@@ -403,12 +408,30 @@ FILES_${PN}-scripts = "\
 	/etc/xen/scripts/vif-openvswitch \
 	/etc/xen/scripts/vif-route \
 	/etc/xen/scripts/vif-setup \
+	"
+
+FILES_${PN}-scripts-block = " \
+	/etc/xen/scripts/blktap \
+	/etc/xen/scripts/block \
+	/etc/xen/scripts/block-common.sh \
+	/etc/xen/scripts/block-enbd \
+	/etc/xen/scripts/block-iscsi \
+	/etc/xen/scripts/block-nbd \
 	/etc/xen/scripts/vscsi \
+	"
+
+FILES_${PN}-scripts-common = " \
+	/etc/xen/scripts/external-device-migrate \
+	/etc/xen/scripts/hotplugpath.sh \
+	/etc/xen/scripts/locking.sh \
+	/etc/xen/scripts/logging.sh \
 	/etc/xen/scripts/xen-hotplug-cleanup \
 	/etc/xen/scripts/xen-hotplug-common.sh \
 	/etc/xen/scripts/xen-network-common.sh \
 	/etc/xen/scripts/xen-script-common.sh \
 	"
+
+FILES_${PN}-udev = "/etc/udev"
 
 FILES_${PN}-xcutils = "\
 	/usr/lib/xen/bin/lsevtchn \
