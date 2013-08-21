@@ -564,9 +564,6 @@ do_configure() {
 	# fixup qemu-xen-traditional pciutils check hardcoded to test /usr/include/pci
 	sed -i 's/\/usr\/include\/pci/$(STAGING_INCDIR)\/pci/g' ${S}/tools/qemu-xen-traditional/xen-hooks.mak
 
-	# pci passthrough isn't built by default?
-	# sed -i 's/--enable-xen --target-list=i386-softmmu/--enable-xen --enable-xen-pci-passthrough --target-list=i386-softmmu/g' ${S}/tools/Makefile
-
 	# fixup for qemu to cross compile
 	sed -i 's/configure --d/configure --cross-prefix=${TARGET_PREFIX} --d/g' ${S}/tools/qemu-xen-traditional/xen-setup
 
