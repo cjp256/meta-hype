@@ -50,11 +50,13 @@ RDEPENDS_xen-base = "\
 
 RDEPENDS_${PN}-scripts-block = "\
 	${PN}-scripts-common \
+	${PN}-udev \
 	"
 
 RDEPENDS_${PN}-scripts-network = "\
 	bridge-utils \
 	${PN}-scripts-common \
+	${PN}-udev \
 	"
 
 PACKAGES = "\
@@ -101,6 +103,7 @@ PACKAGES = "\
 	${PN}-scripts-common \
 	${PN}-scripts-network \
 	${PN}-staticdev \
+	${PN}-udev \
 	${PN}-volatiles \
 	${PN}-xcutils \
 	${PN}-xencommons \
@@ -427,6 +430,8 @@ FILES_${PN}-scripts-common = " \
 	/etc/xen/scripts/xen-network-common.sh \
 	/etc/xen/scripts/xen-script-common.sh \
 	"
+
+FILES_${PN}-udev = "/etc/udev"
 
 FILES_${PN}-xcutils = "\
 	/usr/lib/xen/bin/lsevtchn \
