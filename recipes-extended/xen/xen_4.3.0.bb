@@ -39,6 +39,7 @@ RDEPENDS_xen-base = "\
  	${PN}-hvmloader \
 	${PN}-scripts-block \
 	${PN}-scripts-network \
+	${PN}-udev \
 	${PN}-xenpaging \
 	${PN}-xen-watchdog \
 	${PN}-xencommons \
@@ -221,9 +222,6 @@ FILES_${PN}-base = "\
 	/etc/default/volatiles/99_xen \
 	/etc/default/xencommons \
 	/etc/default/xendomains \
-	/etc/udev/rules.d \
-	/etc/udev/rules.d/xen-backend.rules \
-	/etc/udev/rules.d/xend.rules \
 	/etc/xen/auto \
 	/etc/xen/cpupool \
 	/etc/sysconfig/xendomains \
@@ -431,7 +429,10 @@ FILES_${PN}-scripts-common = " \
 	/etc/xen/scripts/xen-script-common.sh \
 	"
 
-FILES_${PN}-udev = "/etc/udev"
+FILES_${PN}-udev = "\
+	/etc/udev/rules.d/xen-backend.rules \
+	/etc/udev/rules.d/xend.rules \
+	"
 
 FILES_${PN}-xcutils = "\
 	/usr/lib/xen/bin/lsevtchn \
