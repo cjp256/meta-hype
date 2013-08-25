@@ -19,7 +19,7 @@ SLEEP=$(which sleep)
 fatal() {
     echo $1 >$CONSOLE
     echo >$CONSOLE
-    exec sh
+    sh
 }
 # production logging failure sequence (no shell)
 fatal_prod() {
