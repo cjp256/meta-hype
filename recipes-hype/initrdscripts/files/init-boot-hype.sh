@@ -136,8 +136,12 @@ mount_rootimg() {
     if ! $MOUNT -t tmpfs -o rw,noatime,mode=755 tmpfs $cow_mnt ; then
         fatal "Failed to mount tmpfs to back rootfs union."
     fi
-    if ! $MOUNT -t unionfs -o dirs=$cow_mnt=rw:$rootro_mnt=ro unionfs $root_mnt ; then
-        fatal "Failed to mount union between $root_img and tmpfs at $cow_mnt."
+
+    if ! $MOUNT -t aufs -o br:$cow_mnt=rw:$rootro_mnt=ro none $root_mnt ; then
+        echo "failed to mount via aufs - trying unionfs..."
+        if ! $MOUNT -t unionfs -o dirs=$cow_mnt=rw:$rootro_mnt=ro unionfs $root_mnt ; then
+            fatal "Failed to mount union between $root_img and tmpfs at $cow_mnt."
+        fi
     fi
 }
 
