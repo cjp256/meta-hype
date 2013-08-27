@@ -48,7 +48,7 @@ do_rootfs[depends] += "${TARGET_ROOTFS_IMAGE}:do_rootfs"
 XEN = "${DEPLOY_DIR_IMAGE}/xen-${MACHINE}.gz"
 TBOOT = "${DEPLOY_DIR_IMAGE}/tboot-${MACHINE}.gz"
 ACM = "${DEPLOY_DIR_IMAGE}/acm_*.bin"
-MBOOT = "${STAGING_LIBDIR}/syslinux/mboot.c32"
+MBOOT = "${STAGING_DATADIR}/syslinux/mboot.c32"
 KERNEL = "${DEPLOY_DIR_IMAGE}/bzImage-${MACHINE}.bin"
 
 # ROOTFS_POSTPROCESS_COMMAND will execute with the context of finalizing the initramfs located at ${IMAGE_ROOTFS}.
@@ -63,7 +63,7 @@ ROOTFS_POSTPROCESS_COMMAND += "install -m 0644 ${MBOOT} ${IMAGE_ROOTFS}/installe
 ROOTFS_POSTPROCESS_COMMAND += "install -m 0644 ${TBOOT} ${IMAGE_ROOTFS}/installer/tboot.gz;"
 ROOTFS_POSTPROCESS_COMMAND += "install -m 0644 ${XEN} ${IMAGE_ROOTFS}/installer/xen.gz;"
 ROOTFS_POSTPROCESS_COMMAND += "install -m 0644 ${ACM} ${IMAGE_ROOTFS}/installer/;"
-	
+
 # Build syslinux config used for target install, not to be confused with isolinux.cfg in build_syslinux_cfg()
 #ROOTFS_POSTPROCESS_COMMAND += "echo "ALLOWOPTIONS 1" > ${IMAGE_ROOTFS}/installer/syslinux.cfg;"
 #ROOTFS_POSTPROCESS_COMMAND += "echo "DEFAULT boot" >> ${IMAGE_ROOTFS}/installer/syslinux.cfg;"
@@ -75,7 +75,7 @@ ROOTFS_POSTPROCESS_COMMAND += "install -m 0644 ${ACM} ${IMAGE_ROOTFS}/installer/
 
 # Pre-requisite modules needed for isolinux.
 syslinux_iso_populate_append() {
-	install -m 0444 ${STAGING_LIBDIR}/syslinux/mboot.c32 ${ISODIR}${ISOLINUXDIR}
+	install -m 0444 ${STAGING_DATADIR}/syslinux/mboot.c32 ${ISODIR}${ISOLINUXDIR}
 }
 
 # Populate modules used to boot.
