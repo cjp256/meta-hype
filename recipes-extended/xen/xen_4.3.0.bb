@@ -105,7 +105,6 @@ PACKAGES = "\
     ${PN}-scripts-network \
     ${PN}-staticdev \
     ${PN}-udev \
-    ${PN}-volatiles \
     ${PN}-xcutils \
     ${PN}-xencommons \
     ${PN}-xend \
@@ -166,13 +165,6 @@ FILES_${PN}-staticdev += "\
     ${libdir}/libxenstat.a \
     ${libdir}/libxenstore.a \
     ${libdir}/libblktap.a \
-    "
-
-FILES_${PN}-volatiles = "\
-    ${localstatedir}/log \
-    ${localstatedir}/run \
-    ${localstatedir}/lock \
-    ${localstatedir}/volatile \
     "
 
 FILES_${PN}-libblktapctl = "${libdir}/libblktapctl.so.*"
@@ -592,7 +584,10 @@ do_compile() {
 do_install() {
     oe_runmake DESTDIR="${D}" install
 
-    # install volatiles bits
+    # remove installed volatiles
+    rm -rf ${D}${localstatedir}/run ${D}${localstatedir}/lock ${D}${localstatedir}/log ${D}${localstatedir}/volatile
+
+    # install volatiles using populate_volatiles mechanism
     install -d ${D}${sysconfdir}/default/volatiles
     echo "d root root 0755 ${localstatedir}/run/xenstored none" \
          > ${D}${sysconfdir}/default/volatiles/99_xen
