@@ -131,6 +131,7 @@ FILES_${PN}-dbg += "\
     ${libdir}/python2.7/site-packages/xen/lowlevel/.debug \
     ${libdir}/fs/xfs/.debug \
     ${libdir}/fs/ufs/.debug \
+    ${libdir}/fs/ext2fs/.debug \
     ${libdir}/fs/ext2fs-lib/.debug \
     ${libdir}/fs/fat/.debug \
     ${libdir}/fs/zfs/.debug \
