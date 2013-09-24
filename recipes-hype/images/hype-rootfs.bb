@@ -1,6 +1,4 @@
-# measured, read-only rootfs
-
-require recipes-tpm/images/core-image-tpm.inc
+require recipes-extended/images/xen-image-minimal.bb
 
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://${COREBASE}/LICENSE;md5=3f40d7994397109285ec7b81fdeb3b58 \
@@ -12,12 +10,6 @@ IMAGE_INSTALL += "\
     lvm2 \
     cryptsetup \
     lsbinitscripts \
-    xen-base \
-    xen-qemu \
-    qemu \
+    packagegroup-tpm \
+    packagegroup-tboot \
 "
-
-# Tidy up bits not needed in the image...
-
-# /boot is taken care of via installer, handled outside hype-rootfs
-ROOTFS_POSTPROCESS_COMMAND += "rm -rf ${IMAGE_ROOTFS}/boot/*; "
