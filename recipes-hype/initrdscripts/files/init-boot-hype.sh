@@ -177,6 +177,10 @@ boot_root() {
     exec switch_root -c $CONSOLE $rootmnt /sbin/init
 }
 
+# XXX: bug workarounds
+rm -rf /var/lock
+mkdir -p /var/lock/lvm
+
 # disable automount rules
 rm -f /etc/udev/rules.d/automount.rules
 
@@ -195,9 +199,6 @@ $MOUNT -t ext4 /dev/mapper/dom0-storage /media/storage
 find_rootimg $ROOT_IMAGE
 measure_file $ROOT_IMAGE_PATH $ROOT_IMAGE_PCR
 mount_rootimg $ROOT_IMAGE_PATH $ROOT_MOUNT
-
-# fixup inittab to swap ttyS0 with hvc0 if using xen
-if grep -q hvc0 /proc/cmdline ; then sed -i 's/ttyS0/hvc0/g' $ROOT_MOUNT/etc/inittab; fi
 
 # a little bit of hackery - mount upcoming partitions...
 # otherwise we would lose access to storage as "busy"     

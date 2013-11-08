@@ -220,6 +220,10 @@ DEVICE=""
 
 echo "welcome to the installer!"
 
+# XXX: bug workarounds
+rm -rf /var/lock
+mkdir -p /var/lock/lvm
+
 # remove automount rules
 rm -f /etc/udev/rules.d/automount.rules
 
