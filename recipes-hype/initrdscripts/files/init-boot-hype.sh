@@ -61,7 +61,7 @@ tss_setup () {
     fi
     # run tcsd
     if ! /etc/init.d/trousers start ; then
-        fatal "failed to start tcsd"
+        echo "failed to start tcsd"; sleep 2
     fi
 }
 
@@ -163,7 +163,7 @@ measure_file() {
     data=$(sha1sum -b $file | awk '{ print $1 }' | tr -d '\n')
     echo "extending PCR $pcr with value $data"
     echo -n "$data" | tpm_extendpcr --pcr $pcr
-    [ $? -ne 0 ] && fatal "tpm_extendpcr failed"
+    [ $? -ne 0 ] && echo "tpm_extendpcr failed" && sleep 2
 }
 
 boot_root() {

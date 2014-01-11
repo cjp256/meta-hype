@@ -65,7 +65,7 @@ tss_setup () {
     fi
     # run tcsd
     if ! /etc/init.d/trousers start ; then
-        fatal "failed to start tcsd"
+        echo "failed to start tcsd"; sleep 2
     fi
 }
 
