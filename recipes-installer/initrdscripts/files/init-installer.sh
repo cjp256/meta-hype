@@ -175,7 +175,7 @@ format_disk() {
 	dd if=/usr/lib/syslinux/mbr.bin of=$DEVICE
 
 	# create lvm partition
-	fdisk $DEVICE <<EOF
+	fdisk -u $DEVICE <<EOF
 	n
 	p
 	1
@@ -213,7 +213,7 @@ EOF
 set -x
 
 DOM0_BOOT_PARTITION_SIZE="128M"
-DOM0_SECURE_PARTITION_SIZE="4G"
+DOM0_SECURE_PARTITION_SIZE="128M"
 DOM0_STORAGE_PARTITION_SIZE="100%FREE"
 DEFAULT_DEVICE="sda"
 DEVICE=""
